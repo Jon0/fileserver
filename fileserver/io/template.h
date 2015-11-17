@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -21,6 +22,8 @@ public:
 	std::string dump() const;
 
 	std::string render(const strmap &map) const;
+
+	std::string render(std::function<std::string(const std::string &)> mapfn) const;
 
 private:
 	void add_item(const std::string &content, bool replace);

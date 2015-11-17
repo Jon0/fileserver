@@ -1,1 +1,6 @@
 # fileserver
+
+# build
+
+cmake
+make

@@ -58,6 +58,20 @@ std::string tmpl::render(const strmap &map) const {
 }
 
 
+std::string tmpl::render(std::function<std::string(const std::string &)> mapfn) const {
+	std::string result = "";
+	for (auto &i : items) {
+		if (i.replace) {
+			result += mapfn(i.content);
+		}
+		else {
+			result += i.content;
+		}
+	}
+	return result;
+}
+
+
 void tmpl::add_item(const std::string &content, bool replace) {
 	if (!content.empty()) {
 		items.emplace_back(tmpl_item{replace, content});

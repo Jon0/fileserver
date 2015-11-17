@@ -2,10 +2,10 @@
 
 #include <string>
 
+#include "file.h"
+
 namespace fserv {
 namespace os {
-
-void error(const char *msg);
 
 int listen_sockfd(int port);
 
@@ -21,16 +21,16 @@ private:
 
 };
 
-class tcp_stream {
+class tcp_socket {
 public:
-	tcp_stream(const tcp_acceptor &a);
-	~tcp_stream();
+	tcp_socket(const tcp_acceptor &a);
+	~tcp_socket();
 
-	std::string reads();
-	void writes(const std::string &s);
+	int fd() const;
 
 private:
 	const int sockfd;
+
 
 };
 

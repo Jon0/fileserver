@@ -1,6 +1,10 @@
 #pragma once
 
+#include <iostream>
 #include <string>
+
+#include "http/request.h"
+#include "os/file.h"
 
 namespace fserv {
 
@@ -10,7 +14,13 @@ public:
 
 	void start() const;
 
+	os::location path_of(const std::string request_path) const;
+
 private:
+	void handle_get(std::iostream &stream, const http::request &r) const;
+
+	std::string return_file(const os::location &loc) const;
+
 	const std::string content_root;
 	const int server_port;
 
