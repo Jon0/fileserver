@@ -157,43 +157,6 @@ int fdbuf::underflow()
 }
 
 
-fd_stream::fd_stream(int fd)
-	:
-	fd(fd) {
-}
-
-
-std::string fd_stream::readto(char end) {
-	int n = read(fd, readbuffer, sizeof(readbuffer));
-	if (n < 0) {
-		error("ERROR reading from socket");
-	}
-	return std::string(readbuffer, n);
-}
-
-
-std::string fd_stream::readlen(size_t length) {
-	int n = read(fd, readbuffer, sizeof(readbuffer));
-	if (n < 0) {
-		error("ERROR reading from socket");
-	}
-	return std::string(readbuffer, n);
-}
-
-
-void fd_stream::sendstr(const std::string &str) const {
-	int out_n = write(fd, str.c_str(), str.length());
-	if (out_n < 0) {
-		error("ERROR writing to socket");
-	}
-}
-
-
-void fd_stream::sendfile(const std::string &filename) const {
-	// use the kernel sendfile function
-}
-
-
 directory::directory(const std::string &path)
 	:
 	path(path) {

@@ -49,12 +49,12 @@ os::location server::path_of(const std::string request_path) const {
 
 void server::handle_get(std::iostream &stream, const http::request &r) const {
 
+	// 
 	// find the requested location
 	std::string result;
 	os::location loc = path_of(r.data.location);
 	if (!loc.exists()) {
 		stream << "HTTP/1.1 404 Not Found\n\n";
-		return;
 	}
 	else if (loc.isdir()) {
 		result += "<h1>Index of " + r.data.location + "</h1>";
@@ -86,30 +86,43 @@ void server::handle_get(std::iostream &stream, const http::request &r) const {
 
 		result += "<tr><th colspan=\"5\"><hr></th></tr>";
 		result += "</table>";
+
+		// return page
+		stream << http::create_response(result);
 	}
 	else {
-		result = return_file(loc);
+		stream << return_file(loc);
 	}
+}
 
-	// return page
-	stream << http::create_response(result);
+
+std::string server::file_ext(const std::string &s) const {
+	return s.substr(s.find('.', 1) + 1);
 }
 
 
 std::string server::return_file(const os::location &loc) const {
 	if (loc.isexec()) {
 
+		// execute script
 		// todo set environment vars
-		return os::exec(loc.path());
+		std::string result = os::exec(loc.path());
+		return http::create_response(result);
 	}
 	else {
+
+		// switch based on file type
+		std::string type = file_ext(loc.path());
+		std::cout << "filetype: " << type << "\n";
 
 		// enable templating
 		std::string file_content = io::read_file(loc.path());
 		io::tmpl t(file_content);
-		return t.render([](const std::string &in) {
+		std::string result = t.render([](const std::string &in) {
 			return os::exec(in);
 		});
+		
+		return http::create_response(result);
 	}
 }
 

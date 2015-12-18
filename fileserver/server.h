@@ -8,11 +8,14 @@
 
 namespace fserv {
 
+
 class server {
 public:
 	server(const std::string &directory, int port);
 
 	void start() const;
+
+	std::string file_ext(const std::string &s) const;
 
 	os::location path_of(const std::string request_path) const;
 
@@ -25,5 +28,6 @@ private:
 	const int server_port;
 
 };
+
 
 }

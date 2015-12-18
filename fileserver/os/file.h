@@ -42,6 +42,10 @@ private:
 };
 
 
+/**
+ * a file desciptor allows reading and writing
+ * to various io devices
+ */
 class fdbuf : public std::streambuf {
 public:
 	typedef std::streambuf::traits_type traits_type;
@@ -65,32 +69,6 @@ private:
 
 
 /**
- * a file desciptor allows reading and writing
- * to various io devices
- * use fdbuf instead
- */
-class fd_stream {
-public:
-	fd_stream(int fd);
-
-	std::string readto(char end);
-
-	std::string readlen(size_t length);
-
-	void sendstr(const std::string &str) const;
-
-	void sendfile(const std::string &filename) const;
-
-private:
-	const int fd;
-
-	char readbuffer[1024];
-
-	std::stringbuf sbuffer;
-};
-
-
-/**
  * A file directory
  */
 class directory {
@@ -108,6 +86,9 @@ private:
 
 };
 
+
+// use the kernel sendfile function
+//void sendfile(const std::string &filename) const {}
 
 }
 }
