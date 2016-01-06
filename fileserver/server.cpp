@@ -117,7 +117,7 @@ void server::return_file(std::iostream &stream, const os::location &loc) const {
 		int transferred = 0;
 		auto start_time = std::chrono::system_clock::now();
 		char buffer[buf_size];
-		while (true) {
+		while (stream.good()) {
 
 			// read from device
 			src_stream.read(buffer, buf_size);
