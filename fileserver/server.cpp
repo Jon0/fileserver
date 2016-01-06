@@ -117,6 +117,25 @@ void server::return_file(std::iostream &stream, const os::location &loc) const {
 		int transferred = 0;
 		auto start_time = std::chrono::system_clock::now();
 		char buffer[buf_size];
+
+		// try sync to the packet header
+		bool search = true;
+		while (search && stream.good()) {
+
+			// read from device
+			src_stream.read(buffer, buf_size);
+			int b = src_stream.gcount();
+
+			for (int i = 0; i < b; ++i) {
+				if (buffer[i] == 0x47) {
+					// magic byte Found
+					std::cout << "found header\n";
+					stream << std::string(&buffer[i], b - i);
+					break;
+				}
+			}
+		}
+
 		while (stream.good()) {
 
 			// read from device
