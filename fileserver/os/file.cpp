@@ -148,14 +148,14 @@ int fdbuf::sync() {
 		}
 		else {
 			std::cout << "fd " << fd_ << ": write error " << done << "\n";
+			return -1;
 		}
 	}
 	return this->pptr() != this->epptr()? 0: -1;
 }
 
 
-int fdbuf::underflow()
-{
+int fdbuf::underflow() {
 	if (this->gptr() == this->egptr()) {
 		std::streamsize pback(std::min(this->gptr() - this->eback(),
 									   std::ptrdiff_t(16 - sizeof(int))));
