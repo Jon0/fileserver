@@ -106,18 +106,11 @@ std::string server::file_ext(const std::string &s) const {
 
 
 void server::return_file(std::iostream &stream, const os::location &loc) const {
-	if (loc.isexec()) {
-
-		// execute script
-		// todo set environment vars
-		std::string result = os::exec(loc.path());
-		stream << http::create_response(result);
-	}
-	else if (loc.ischr()) {
+	if (loc.ischr()) {
 
 		// stream a file
 		stream << http::basic_header(200, "text/html");
-		std::cout << "device " << loc.path() << " requested\n";
+		std::cout << "device " << loc.path() << ", " << loc.device() << " requested\n";
 		std::ifstream src_stream(loc.path(), std::ios::in | std::ios::binary);
 
 		// transfer rate
@@ -141,6 +134,13 @@ void server::return_file(std::iostream &stream, const os::location &loc) const {
 				std::cout << "transferring " << rate << " Mbps\n";
 			}
 		}
+	}
+	else if (loc.isexec()) {
+
+		// execute script
+		// todo set environment vars
+		std::string result = os::exec(loc.path());
+		stream << http::create_response(result);
 	}
 	else {
 

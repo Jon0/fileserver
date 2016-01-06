@@ -46,6 +46,12 @@ int location::size() const {
 	return location_stat.st_size;
 }
 
+
+int location::device() const {
+		return location_stat.st_rdev;
+}
+
+
 std::string location::sizestr() const {
 	return std::to_string(size());
 }

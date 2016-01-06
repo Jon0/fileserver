@@ -26,6 +26,8 @@ public:
 
 	int size() const;
 
+	int device() const;
+
 	std::string sizestr() const;
 
 	std::string modified() const;
