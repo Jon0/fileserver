@@ -11,7 +11,7 @@
 
 namespace fserv {
 
-constexpr int buf_size = 4 * 1024;
+constexpr int buf_size = 16 * 1024;
 
 server::server(const std::string &directory, int port)
 	:
