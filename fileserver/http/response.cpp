@@ -5,6 +5,17 @@
 namespace fserv {
 namespace http {
 
+std::string basic_header(int code, const std::string &mime_type) {
+	std::string header = "";
+	header += "HTTP/1.1 " + std::to_string(code) + " ";
+	header += code_str.at(code) + "\n";
+	if (!mime_type.empty()) {
+		header += "Content-Type: " + mime_type + "\n";
+	}
+	header += "\n";
+	return header;
+}
+
 
 std::string create_response(const response_data &rd, const std::string &content) {
 	std::string header = "";

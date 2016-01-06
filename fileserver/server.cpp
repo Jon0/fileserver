@@ -1,3 +1,6 @@
+#include <chrono>
+#include <fstream>
+
 #include "http/response.h"
 #include "io/strings.h"
 #include "io/template.h"
@@ -8,6 +11,7 @@
 
 namespace fserv {
 
+constexpr int buf_size = 4 * 1024;
 
 server::server(const std::string &directory, int port)
 	:
@@ -49,7 +53,7 @@ os::location server::path_of(const std::string request_path) const {
 
 void server::handle_get(std::iostream &stream, const http::request &r) const {
 
-	// 
+	//
 	// find the requested location
 	std::string result;
 	os::location loc = path_of(r.data.location);
@@ -91,7 +95,7 @@ void server::handle_get(std::iostream &stream, const http::request &r) const {
 		stream << http::create_response(result);
 	}
 	else {
-		stream << return_file(loc);
+		return_file(stream, loc);
 	}
 }
 
@@ -101,13 +105,42 @@ std::string server::file_ext(const std::string &s) const {
 }
 
 
-std::string server::return_file(const os::location &loc) const {
+void server::return_file(std::iostream &stream, const os::location &loc) const {
 	if (loc.isexec()) {
 
 		// execute script
 		// todo set environment vars
 		std::string result = os::exec(loc.path());
-		return http::create_response(result);
+		stream << http::create_response(result);
+	}
+	else if (loc.ischr()) {
+
+		// stream a file
+		stream << http::basic_header(200, "text/html");
+		std::cout << "device " << loc.path() << " requested\n";
+		std::ifstream src_stream(loc.path(), std::ios::in | std::ios::binary);
+
+		// transfer rate
+		int transferred = 0;
+		auto start_time = std::chrono::system_clock::now();
+		char buffer[buf_size];
+		while (true) {
+
+			// read from device
+			src_stream.read(buffer, buf_size);
+			stream << std::string(buffer, buf_size);
+
+			// record transfer rate
+			transferred += buf_size;
+			if (transferred > (1 << 16)) {
+				auto end_time = std::chrono::system_clock::now();
+				std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+				auto rate = static_cast<double>(transferred) / (elapsed_seconds.count() * 1024 * 1024);
+				transferred = 0;
+				start_time = end_time;
+				std::cout << "transferring " << rate << " Mbps\n";
+			}
+		}
 	}
 	else {
 
@@ -121,8 +154,8 @@ std::string server::return_file(const os::location &loc) const {
 		std::string result = t.render([](const std::string &in) {
 			return os::exec(in);
 		});
-		
-		return http::create_response(result);
+
+		stream << http::create_response(result);
 	}
 }
 

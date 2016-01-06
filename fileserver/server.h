@@ -22,7 +22,7 @@ public:
 private:
 	void handle_get(std::iostream &stream, const http::request &r) const;
 
-	std::string return_file(const os::location &loc) const;
+	void return_file(std::iostream &stream, const os::location &loc) const;
 
 	const std::string content_root;
 	const int server_port;

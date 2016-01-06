@@ -15,7 +15,7 @@ void error(const char *msg) {
 }
 
 
-location::location(const std::string &path) 
+location::location(const std::string &path)
 	:
 	filepath(path),
 	location_exists(stat(path.c_str(), &location_stat)) {
@@ -29,6 +29,11 @@ bool location::exists() const {
 
 bool location::isdir() const {
 	return S_ISDIR(location_stat.st_mode);
+}
+
+
+bool location::ischr() const {
+	return S_ISCHR(location_stat.st_mode);
 }
 
 

@@ -20,6 +20,9 @@ struct response_data {
 };
 
 
+std::string basic_header(int code, const std::string &mime_type);
+
+
 std::string create_response(const response_data &rd, const std::string &content);
 
 

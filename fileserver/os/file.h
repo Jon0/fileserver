@@ -20,6 +20,8 @@ public:
 
 	bool isdir() const;
 
+	bool ischr() const ;
+
 	bool isexec() const;
 
 	int size() const;
