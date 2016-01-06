@@ -120,11 +120,11 @@ void server::return_file(std::iostream &stream, const os::location &loc) const {
 		while (stream.good()) {
 
 			// read from device
-			src_stream.read(buffer, buf_size);
-			stream << std::string(buffer, buf_size);
+			int b = src_stream.readsome(buffer, buf_size);
+			stream << std::string(buffer, b);
 
 			// record transfer rate
-			transferred += buf_size;
+			transferred += b;
 			if (transferred > (1 << 16)) {
 				auto end_time = std::chrono::system_clock::now();
 				std::chrono::duration<double> elapsed_seconds = end_time - start_time;
