@@ -120,7 +120,8 @@ void server::return_file(std::iostream &stream, const os::location &loc) const {
 		while (stream.good()) {
 
 			// read from device
-			int b = src_stream.readsome(buffer, buf_size);
+			src_stream.read(buffer, buf_size);
+			int b = src_stream.gcount();
 			stream << std::string(buffer, b);
 
 			// record transfer rate
