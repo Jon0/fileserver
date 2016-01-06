@@ -141,10 +141,13 @@ int fdbuf::sync() {
 		// reasonable to consider it a success only if it managed to
 		// write the entire buffer and, e.g., loop a couple of times
 		// to try achieving this success.
-		if (0 < done) {
+		if (done > 0) {
 			std::copy(this->pbase() + done, this->pptr(), this->pbase());
 			this->setp(this->pbase(), this->epptr());
 			this->pbump(size - done);
+		}
+		else {
+			std::cout << "fd " << fd_ << ": write error " << done << "\n";
 		}
 	}
 	return this->pptr() != this->epptr()? 0: -1;
@@ -158,6 +161,9 @@ int fdbuf::underflow()
 									   std::ptrdiff_t(16 - sizeof(int))));
 		std::copy(this->egptr() - pback, this->egptr(), this->eback());
 		int done(::read(this->fd_, this->eback() + pback, bufsize));
+		if (done < 0) {
+			std::cout << "fd " << fd_ << ": read error " << done << "\n";
+		}
 		this->setg(this->eback(),
 				   this->eback() + pback,
 				   this->eback() + pback + std::max(0, done));
