@@ -1,8 +1,12 @@
 #include <iostream>
 
+#include <core/engine.h>
 #include <fileserver/server.h>
 
 int main(int argc, char *argv[]) {
+	core::engine e;
+	e.start();
+
 	std::string directory = ".";
 	int port = 8080;
 
