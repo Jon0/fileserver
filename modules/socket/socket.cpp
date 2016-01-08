@@ -37,7 +37,7 @@ int listen_sockfd(int port) {
 
 tcp_acceptor::tcp_acceptor(core::engine &e, int port)
 	:
-	core::channel(e, "sockctl"),
+	core::node(e, "socketctl"),
 	sockfd(listen_sockfd(port)) {
 }
 
@@ -58,24 +58,26 @@ int tcp_acceptor::acceptfd() const {
 }
 
 
-void tcp_acceptor::msg_module(const core::object &obj) {
+void tcp_acceptor::recieve(core::channel &remote, const core::object &obj) {
 
 }
 
 void tcp_acceptor::update() {
+	//std::thread t(..., n.get_engine());
+	//t.join();
 
 	// accept http requests
 	while (true) {
 		std::cout << "wait for connection\n";
 		os::tcp_socket *s = new os::tcp_socket(get_engine(), *this);
-		get_engine().channel_open(s);
+		get_engine().node_open(s);
 	}
 }
 
 
 tcp_socket::tcp_socket(core::engine &e, const tcp_acceptor &a)
 	:
-	core::channel(e, "socktcp"),
+	core::node(e, "sockettcp"),
 	sockfd(a.acceptfd()) {
 }
 
@@ -90,7 +92,7 @@ int tcp_socket::fd() const {
 }
 
 
-void tcp_socket::msg_module(const core::object &obj) {
+void tcp_socket::recieve(core::channel &remote, const core::object &obj) {
 
 }
 
@@ -99,8 +101,14 @@ void tcp_socket::update() {
 	// report raw data
 	char buffer[1024];
 	int n = read(sockfd, buffer, 1024);
-	msg_engine(core::object(std::string(buffer, n)));
 
+	// add a core::object (uses shared_ptr anyway)
+	core::object data_obj(std::string(buffer, n));
+
+	// copy to all connected channels (that are owned by this)
+	for (core::channel *c : owned_channels()) {
+		c->send(data_obj);
+	}
 }
 
 

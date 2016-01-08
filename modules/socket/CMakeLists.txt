@@ -1,4 +1,4 @@
-set(MODULE_NAME "server")
+set(MODULE_NAME "socket")
 add_definitions(-std=c++14)
 
 # main library cpp files

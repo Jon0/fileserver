@@ -8,29 +8,29 @@ engine::engine()
     :
     initial_modules({
         "modules/log/liblog.so",
-        "modules/server/libserver.so"
+        "modules/socket/libsocket.so"
     }) {}
 
 void engine::start() {
     for (std::string &m : initial_modules) {
         open_module(m);
     }
-    for (channel *c : channels) {
-        c->msg_module(object("accept"));
-    }
+
+    // todo: initial messaging
 
     while (true) {
+        std::cout << "main loop\n";
         // todo: read and respond etc...
     }
 }
 
-void engine::channel_open(channel *c) {
+void engine::node_open(node *n) {
     //std::cout << "opening channel " << name << "\n";
-    channels.emplace_back(c);
-    c->update();
+    nodes.emplace_back(n);
+    n->update();
 }
 
-void engine::channel_close(channel *c) {
+void engine::node_close(node *n) {
 
 }
 

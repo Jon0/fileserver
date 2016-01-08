@@ -21,8 +21,8 @@ public:
      * make these nice for modules
      * so they don't get left open
      */
-    void channel_open(channel *c);
-    void channel_close(channel *c);
+    void node_open(node *n);
+    void node_close(node *n);
 
 
     void start_process();
@@ -34,7 +34,7 @@ private:
     std::vector<std::string> initial_modules;
 
     // list of open channels
-    std::vector<channel *> channels;
+    std::vector<node *> nodes;
 
     // list of connected modules
     std::vector<module> modules;

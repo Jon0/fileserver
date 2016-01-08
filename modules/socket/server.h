@@ -8,14 +8,6 @@ extern "C" {
 
 void init(core::engine &e);
 
-}
-
-namespace os {
-
-void sockaccept(core::engine &e);
-
-void sockctl(core::channel &c);
-
-void sendtcp(core::channel &c);
+void uninit(core::engine &e);
 
 }
