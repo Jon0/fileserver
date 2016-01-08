@@ -4,12 +4,12 @@
 
 extern "C" {
 
-void init(core::engine &e) {
-    std::cout << "init\n";
+void log_init(core::engine &e) {
+    std::cout << "log init\n";
 }
 
-void uninit(core::engine &e) {
-    std::cout << "uninit\n";
+void log_uninit(core::engine &e) {
+    std::cout << "log uninit\n";
 }
 
 void update() {

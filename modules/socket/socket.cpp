@@ -38,6 +38,7 @@ int listen_sockfd(int port) {
 tcp_acceptor::tcp_acceptor(core::engine &e, int port)
 	:
 	core::node(e, "socketctl"),
+	connected(false),
 	sockfd(listen_sockfd(port)) {
 }
 
@@ -58,20 +59,32 @@ int tcp_acceptor::acceptfd() const {
 }
 
 
-void tcp_acceptor::recieve(core::channel &remote, const core::object &obj) {
+core::node *tcp_acceptor::match(const core::node &from, const std::string &type) {
+	return nullptr;
+}
+
+
+void tcp_acceptor::recieve(core::channel &c, const core::object &obj) {
 
 }
 
+
 void tcp_acceptor::update() {
+	if (connected) {
+		return;
+	}
 	//std::thread t(..., n.get_engine());
 	//t.join();
 
 	// accept http requests
-	while (true) {
-		std::cout << "wait for connection\n";
-		os::tcp_socket *s = new os::tcp_socket(get_engine(), *this);
-		get_engine().node_open(s);
+	std::cout << "wait for connection\n";
+	os::tcp_socket *s = new os::tcp_socket(get_engine(), *this);
+
+	// find a recieving channel
+	for (auto n : get_engine().node_search(*this, "binary")) {
+		s->channel_open(n);
 	}
+	connected = true;
 }
 
 
@@ -92,8 +105,16 @@ int tcp_socket::fd() const {
 }
 
 
-void tcp_socket::recieve(core::channel &remote, const core::object &obj) {
+core::node *tcp_socket::match(const core::node &from, const std::string &type) {
+	return nullptr;
+}
 
+
+void tcp_socket::recieve(core::channel &c, const core::object &obj) {
+	if (obj.type() == core::value_type::record_type) {
+		std::string buffer = obj["data"].str();
+		int n = write(sockfd, buffer.c_str(), buffer.length());
+	}
 }
 
 
@@ -102,13 +123,13 @@ void tcp_socket::update() {
 	char buffer[1024];
 	int n = read(sockfd, buffer, 1024);
 
-	// add a core::object (uses shared_ptr anyway)
-	core::object data_obj(std::string(buffer, n));
+	core::object::record data = {
+		{"type", "binary"},
+		{"port", "8080"},
+		{"data", std::string(buffer, n)}
+	};
 
-	// copy to all connected channels (that are owned by this)
-	for (core::channel *c : owned_channels()) {
-		c->send(data_obj);
-	}
+	send_all(data);
 }
 
 

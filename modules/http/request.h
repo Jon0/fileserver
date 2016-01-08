@@ -6,11 +6,6 @@
 
 namespace http {
 
-/**
- * string split function using a char delimiter
- */
-std::vector<std::string> split(const std::string &str, char delim);
-
 
 using str_map = std::unordered_map<std::string, std::string>;
 

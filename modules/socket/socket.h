@@ -16,10 +16,12 @@ public:
 
 	int acceptfd() const;
 
-	void recieve(core::channel &remote, const core::object &obj) override;
+	core::node *match(const core::node &from, const std::string &type) override;
+	void recieve(core::channel &c, const core::object &obj) override;
 	void update() override;
 
 private:
+	bool connected;
 	const int sockfd;
 
 };
@@ -31,7 +33,8 @@ public:
 
 	int fd() const;
 
-	void recieve(core::channel &remote, const core::object &obj) override;
+	core::node *match(const core::node &from, const std::string &type) override;
+	void recieve(core::channel &c, const core::object &obj) override;
 	void update() override;
 
 private:

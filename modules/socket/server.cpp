@@ -1,17 +1,21 @@
+#include <iostream>
 #include <memory>
-#include <thread>
 
-#include "socket.h"
 #include "server.h"
+#include "socket.h"
 
 std::unique_ptr<core::node> sctl;
 
-void init(core::engine &e) {
+extern "C" {
+
+void socket_init(core::engine &e) {
+	std::cout << "socket init\n";
 	sctl = std::make_unique<os::tcp_acceptor>(e, 8080);
-	e.node_open(sctl.get());
 }
 
-void uninit(core::engine &e) {
-	e.node_close(sctl.get());
+void socket_uninit(core::engine &e) {
+	std::cout << "socket uninit\n";
 	sctl = nullptr;
+}
+
 }
