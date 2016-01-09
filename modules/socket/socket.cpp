@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 
 #include <fcntl.h>
@@ -46,8 +47,8 @@ bool readyfd(int fd) {
 
     /* Wait up to five seconds. */
 	struct timeval tv;
-    tv.tv_sec = 2;
-    tv.tv_usec = 0;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100;
 
     int retval = select(fd + 1, &rfds, NULL, NULL, &tv);
     /* Don't rely on the value of tv now! */
@@ -66,7 +67,8 @@ bool readyfd(int fd) {
 tcp_acceptor::tcp_acceptor(core::engine &e, int port)
 	:
 	core::node(e, "accept" + std::to_string(port)),
-	sockfd(listen_sockfd(port)) {
+	sockfd(listen_sockfd(port)),
+	next_sock_id(0) {
 }
 
 
@@ -104,7 +106,8 @@ void tcp_acceptor::update() {
 		sockaddr_in cli_addr;
 		int newfd = acceptfd(cli_addr);
 		if (newfd >= 0) {
-			sockets.emplace_back(std::make_unique<tcp_socket>(get_engine(), newfd, cli_addr));
+			std::string name = get_name() + "-" + std::to_string(next_sock_id++);
+			sockets.emplace_back(std::make_unique<tcp_socket>(get_engine(), newfd, name, cli_addr));
 			tcp_socket *s = sockets.back().get();
 
 			// find a recieving channel
@@ -113,12 +116,22 @@ void tcp_acceptor::update() {
 			}
 		}
 	}
+
+	sockets.erase(
+		std::remove_if(
+			sockets.begin(),
+			sockets.end(),
+			[](std::unique_ptr<tcp_socket> &s) {
+				return !s->is_open();
+			}),
+		sockets.end()
+	);
 }
 
 
-tcp_socket::tcp_socket(core::engine &e, int fd, const sockaddr_in &cli_addr)
+tcp_socket::tcp_socket(core::engine &e, int fd, const std::string &name, const sockaddr_in &cli_addr)
 	:
-	core::node(e, "sockettcp"),
+	core::node(e, name),
 	sockfd(fd),
 	remote_open(true) {
 	char strbuf[INET_ADDRSTRLEN];
@@ -149,15 +162,24 @@ core::node *tcp_socket::match(const core::node &from, const std::string &type) {
 
 
 void tcp_socket::recieve(core::channel &c, const core::object &obj) {
-	if (obj.type() == core::value_type::record_type) {
+	if (!is_open()) {
+		std::cout << "writing to closed socket\n";
+		return;
+	}
+	else if (fcntl(sockfd, F_GETFL) < 0) {
+		perror("ERROR on fcntl");
+	}
+	else if (obj.type() == core::value_type::record_type) {
 		std::string buffer = obj["data"].as_string();
 		if (buffer.length() > 0) {
 			int n = write(sockfd, buffer.c_str(), buffer.length());
 			if (n < 0) {
+				remote_open = false;
 				perror("ERROR on write");
 			}
 			else if (n == 0) {
 				remote_open = false;
+				std::cout << "socket closed\n";
 			}
 		}
 	}
@@ -170,16 +192,17 @@ void tcp_socket::update() {
 		return;
 	}
 	if (readyfd(sockfd)) {
-		std::cout << "read socket\n";
 
 		// report raw data
 		char buffer[1024];
 		int n = read(sockfd, buffer, 1024);
 		if (n < 0) {
+			remote_open = false;
 			perror("ERROR on read");
 		}
 		else if (n == 0) {
 			remote_open = false;
+			std::cout << "socket closed\n";
 		}
 		else if (n) {
 			core::object::record data = {

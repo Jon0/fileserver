@@ -29,13 +29,14 @@ core::node *httpctl::match(const core::node &from, const std::string &type) {
 
 void httpctl::recieve(core::channel &c, const core::object &obj) {
     if (obj["type"].as_string() == "binary") {
-        for (auto n : get_engine().node_search(*this, "http")) {
-            channel_open(n);
-        }
-        send_all(read_request(obj));
+        //for (auto n : get_engine().node_search(*this, "http")) {
+        //    channel_open(n);
+        //}
+        //send_all(read_request(obj));
+        c.reply(read_response(read_request(obj)));
     }
     else {
-        reply_all(read_response(obj));
+        //reply_all(read_response(obj));
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 #include "channel.h"
@@ -37,10 +38,13 @@ public:
 private:
     void open_module(const std::string &module_path);
 
+    void node_cleanup();
+
     std::vector<std::string> initial_modules;
 
     // list of open channels
     std::vector<node *> nodes;
+    std::unordered_set<node *> to_remove;
 
     // list of connected modules
     std::vector<std::unique_ptr<module>> modules;

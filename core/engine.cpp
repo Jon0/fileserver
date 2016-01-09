@@ -30,10 +30,13 @@ void engine::start() {
     while (true) {
         // read and respond etc...
         for (node *n : nodes) {
-            std::cout << "[engine] updating " << n->get_name() << "\n";
-            n->update();
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            if (to_remove.count(n) == 0) {
+                //std::cout << "[engine] updating " << n->get_name() << "\n";
+                n->update();
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
         }
+        node_cleanup();
     }
 }
 
@@ -47,15 +50,7 @@ void engine::node_close(node *n) {
     for (node *nd : nodes) {
         nd->remove_notify(n);
     }
-    nodes.erase(
-        std::remove_if(
-            nodes.begin(),
-            nodes.end(),
-            [n](node *nd) {
-                return n == nd;
-            }),
-        nodes.end()
-    );
+    to_remove.insert(n);
 }
 
 std::vector<node *> engine::node_search(const node &from, const std::string &type) {
@@ -78,6 +73,18 @@ void engine::thread_start(std::function<void()> handler) {
 void engine::open_module(const std::string &module_path) {
     modules.emplace_back(std::make_unique<module>(module_path));
     modules.back()->init_module(*this);
+}
+
+void engine::node_cleanup() {
+    nodes.erase(
+        std::remove_if(
+            nodes.begin(),
+            nodes.end(),
+            [this](node *n) {
+                return to_remove.count(n) > 0;
+            }),
+        nodes.end()
+    );
 }
 
 }

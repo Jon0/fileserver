@@ -28,12 +28,13 @@ public:
 private:
 	const int sockfd;
 	std::vector<std::unique_ptr<tcp_socket>> sockets;
+	int next_sock_id;
 
 };
 
 class tcp_socket : public core::node {
 public:
-	tcp_socket(core::engine &e, int fd, const sockaddr_in &cli_addr);
+	tcp_socket(core::engine &e, int fd, const std::string &name, const sockaddr_in &cli_addr);
 	~tcp_socket();
 
 	int fd() const;
