@@ -122,9 +122,13 @@ location location::append(const std::string &path) const {
 
 
 core::object location::as_object() const {
+
+    // include directory content
+    // or include filedata
     core::object::record data = {
             {"path", path()},
             {"exists", exists()},
+            {"isdir", isdir()},
             {"mode", mode()},
     };
     return data;

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 
@@ -31,8 +32,8 @@ void engine::start() {
         for (node *n : nodes) {
             std::cout << "[engine] updating " << n->get_name() << "\n";
             n->update();
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
 
@@ -43,6 +44,18 @@ void engine::node_open(node *n) {
 
 void engine::node_close(node *n) {
     std::cout << "[engine] closing node " << n->get_name() << "\n";
+    for (node *nd : nodes) {
+        nd->remove_notify(n);
+    }
+    nodes.erase(
+        std::remove_if(
+            nodes.begin(),
+            nodes.end(),
+            [n](node *nd) {
+                return n == nd;
+            }),
+        nodes.end()
+    );
 }
 
 std::vector<node *> engine::node_search(const node &from, const std::string &type) {

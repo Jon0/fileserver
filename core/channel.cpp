@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 
 #include "channel.h"
@@ -39,6 +40,28 @@ channel *node::channel_open(node *other) {
 
 void node::register_channel(channel *c) {
     reply_channels.push_back(c);
+}
+
+
+void node::remove_notify(node *other) {
+    channels.erase(
+        std::remove_if(
+            channels.begin(),
+            channels.end(),
+            [other](std::unique_ptr<channel> &c) {
+                return c->get_reciever() == other;
+            }),
+        channels.end()
+    );
+    reply_channels.erase(
+        std::remove_if(
+            reply_channels.begin(),
+            reply_channels.end(),
+            [other](channel *c) {
+                return &c->owner == other;
+            }),
+        reply_channels.end()
+    );
 }
 
 
@@ -92,6 +115,12 @@ void channel::send(const object &obj) {
 void channel::reply(const object &obj) {
     owner.msg(*this, obj);
 }
+
+
+node *channel::get_reciever() const {
+    return remote;
+}
+
 
 void channel::set_reciever(node *other) {
     if (other) {

@@ -1,12 +1,13 @@
 #include <iostream>
 
+#include <fcntl.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 
 #include "socket.h"
 
-namespace os {
+namespace sock {
 
 
 void error(const char *msg) {
@@ -21,6 +22,7 @@ int listen_sockfd(int port) {
 	if (sockfd < 0) {
 		error("ERROR opening socket");
 	}
+	fcntl(sockfd, F_SETFL, O_NONBLOCK);
 
 	// bind and listen on socket
 	sockaddr_in serv_addr;
@@ -35,10 +37,35 @@ int listen_sockfd(int port) {
 }
 
 
+bool readyfd(int fd) {
+
+	/* Watch fd to see when it has input. */
+	fd_set rfds;
+	FD_ZERO(&rfds);
+	FD_SET(fd, &rfds);
+
+    /* Wait up to five seconds. */
+	struct timeval tv;
+    tv.tv_sec = 2;
+    tv.tv_usec = 0;
+
+    int retval = select(fd + 1, &rfds, NULL, NULL, &tv);
+    /* Don't rely on the value of tv now! */
+
+	if (retval == -1) {
+		perror("ERROR on select");
+	}
+    else if (retval) {
+		/* FD_ISSET(0, &rfds) will be true. */
+    	return true;
+	}
+	return false;
+}
+
+
 tcp_acceptor::tcp_acceptor(core::engine &e, int port)
 	:
-	core::node(e, "socketctl"),
-	connected(false),
+	core::node(e, "accept" + std::to_string(port)),
 	sockfd(listen_sockfd(port)) {
 }
 
@@ -48,12 +75,11 @@ tcp_acceptor::~tcp_acceptor() {
 }
 
 
-int tcp_acceptor::acceptfd() const {
-	sockaddr_in cli_addr;
+int tcp_acceptor::acceptfd(sockaddr_in &cli_addr) const {
 	socklen_t clilen = sizeof(cli_addr);
 	int newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 	if (newsockfd < 0) {
-		error("ERROR on accept");
+		perror("ERROR on accept");
 	}
 	return newsockfd;
 }
@@ -70,28 +96,35 @@ void tcp_acceptor::recieve(core::channel &c, const core::object &obj) {
 
 
 void tcp_acceptor::update() {
-	if (connected) {
-		return;
-	}
 	//std::thread t(..., n.get_engine());
 	//t.join();
 
-	// accept http requests
-	std::cout << "wait for connection\n";
-	os::tcp_socket *s = new os::tcp_socket(get_engine(), *this);
+	// accept requests
+	if (readyfd(sockfd)) {
+		sockaddr_in cli_addr;
+		int newfd = acceptfd(cli_addr);
+		if (newfd >= 0) {
+			sockets.emplace_back(std::make_unique<tcp_socket>(get_engine(), newfd, cli_addr));
+			tcp_socket *s = sockets.back().get();
 
-	// find a recieving channel
-	for (auto n : get_engine().node_search(*this, "binary")) {
-		s->channel_open(n);
+			// find a recieving channel
+			for (auto n : get_engine().node_search(*this, "binary")) {
+				s->channel_open(n);
+			}
+		}
 	}
-	connected = true;
 }
 
 
-tcp_socket::tcp_socket(core::engine &e, const tcp_acceptor &a)
+tcp_socket::tcp_socket(core::engine &e, int fd, const sockaddr_in &cli_addr)
 	:
 	core::node(e, "sockettcp"),
-	sockfd(a.acceptfd()) {
+	sockfd(fd),
+	remote_open(true) {
+	char strbuf[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &cli_addr.sin_addr.s_addr, strbuf, INET_ADDRSTRLEN);
+	ipv4_str = strbuf;
+	port_str = std::to_string(ntohs(cli_addr.sin_port));
 }
 
 
@@ -105,6 +138,11 @@ int tcp_socket::fd() const {
 }
 
 
+bool tcp_socket::is_open() const {
+	return sockfd >= 0 && remote_open;
+}
+
+
 core::node *tcp_socket::match(const core::node &from, const std::string &type) {
 	return nullptr;
 }
@@ -115,23 +153,44 @@ void tcp_socket::recieve(core::channel &c, const core::object &obj) {
 		std::string buffer = obj["data"].as_string();
 		if (buffer.length() > 0) {
 			int n = write(sockfd, buffer.c_str(), buffer.length());
+			if (n < 0) {
+				perror("ERROR on write");
+			}
+			else if (n == 0) {
+				remote_open = false;
+			}
 		}
 	}
 }
 
 
 void tcp_socket::update() {
-	// report raw data
-	char buffer[1024];
-	int n = read(sockfd, buffer, 1024);
+	if (!is_open()) {
+		std::cout << "updating closed socket\n";
+		return;
+	}
+	if (readyfd(sockfd)) {
+		std::cout << "read socket\n";
 
-	core::object::record data = {
-		{"type", "binary"},
-		{"port", "8080"},
-		{"data", std::string(buffer, n)}
-	};
-
-	send_all(data);
+		// report raw data
+		char buffer[1024];
+		int n = read(sockfd, buffer, 1024);
+		if (n < 0) {
+			perror("ERROR on read");
+		}
+		else if (n == 0) {
+			remote_open = false;
+		}
+		else if (n) {
+			core::object::record data = {
+				{"type", "binary"},
+				{"ipv4", ipv4_str},
+				{"port", port_str},
+				{"data", std::string(buffer, n)}
+			};
+			send_all(data);
+		}
+	}
 }
 
 

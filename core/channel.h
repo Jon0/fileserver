@@ -25,6 +25,7 @@ public:
 
     channel *channel_open(node *other);
     void register_channel(channel *c);
+    void remove_notify(node *other);
 
     // ensure updates can only access the owned channels
     std::vector<channel *> owned_channels() const;
@@ -76,6 +77,7 @@ public:
     std::string in_type;
     std::string out_type;
 
+    node *get_reciever() const;
     void set_reciever(node *other);
 
     void send(const object &obj);
