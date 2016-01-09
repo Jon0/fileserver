@@ -8,8 +8,10 @@ namespace core {
 engine::engine()
     :
     initial_modules({
+        "modules/file/libfile.so",
         "modules/http/libhttp.so",
         "modules/log/liblog.so",
+        "modules/route/libroute.so",
         "modules/socket/libsocket.so",
     }) {}
 

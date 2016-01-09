@@ -35,6 +35,7 @@ public:
 	using record = std::unordered_map<std::string, object>;
 
 	object();
+	object(bool data);
 	object(const char *data);
 	object(const std::string &data);
 	object(const record &data);
@@ -57,6 +58,20 @@ class value;
 template<>
 class value<value_type::null_type> : public value_base {
 public:
+};
+
+template<>
+class value<value_type::bool_type> : public value_base {
+public:
+	value(bool v);
+
+	value_type type() const override;
+	std::string str() const override;
+
+	std::string as_string() const override;
+	const object &operator[](const std::string &key) const override;
+
+	const bool stored_value;
 };
 
 template<>

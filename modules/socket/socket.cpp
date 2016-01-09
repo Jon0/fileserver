@@ -112,8 +112,10 @@ core::node *tcp_socket::match(const core::node &from, const std::string &type) {
 
 void tcp_socket::recieve(core::channel &c, const core::object &obj) {
 	if (obj.type() == core::value_type::record_type) {
-		std::string buffer = obj["data"].str();
-		int n = write(sockfd, buffer.c_str(), buffer.length());
+		std::string buffer = obj["data"].as_string();
+		if (buffer.length() > 0) {
+			int n = write(sockfd, buffer.c_str(), buffer.length());
+		}
 	}
 }
 

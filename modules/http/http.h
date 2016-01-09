@@ -27,6 +27,7 @@ public:
  */
 std::vector<std::string> split(const std::string &str, char delim);
 
+core::object read_response(const core::object &obj);
 
 core::object read_request(const core::object &obj);
 

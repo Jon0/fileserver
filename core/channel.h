@@ -23,12 +23,14 @@ public:
     engine &get_engine();
     std::string get_name() const;
 
-    void channel_open(node *other);
+    channel *channel_open(node *other);
+    void register_channel(channel *c);
 
     // ensure updates can only access the owned channels
     std::vector<channel *> owned_channels() const;
 
     void send_all(const object &obj);
+    void reply_all(const object &obj);
 
     void msg(channel &remote, const object &obj);
 
@@ -47,6 +49,11 @@ private:
      * channels owned by this
      */
     std::vector<std::unique_ptr<channel>> channels;
+
+    /**
+     * channels not owned by this
+     */
+    std::vector<channel *> reply_channels;
 
 };
 

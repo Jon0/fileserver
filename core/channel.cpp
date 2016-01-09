@@ -28,11 +28,17 @@ std::string node::get_name() const {
 }
 
 
-void node::channel_open(node *other) {
+channel *node::channel_open(node *other) {
     std::cout << "[" << name << "] connecting to " << other->get_name() << "\n";
-
     channels.emplace_back(std::make_unique<channel>(*this));
-    channels.back()->set_reciever(other);
+    channel *opened_channel = channels.back().get();
+    opened_channel->set_reciever(other);
+    return opened_channel;
+}
+
+
+void node::register_channel(channel *c) {
+    reply_channels.push_back(c);
 }
 
 
@@ -48,9 +54,18 @@ std::vector<channel *> node::owned_channels() const {
 void node::send_all(const object &obj) {
 
     // copy to all connected channels (that are owned by this)
-	for (channel *c : owned_channels()) {
+	for (auto &c : channels) {
 		c->send(obj);
 	}
+}
+
+
+void node::reply_all(const object &obj) {
+
+    // copy to all connected channels (that are owned by this)
+    for (channel *c : reply_channels) {
+        c->reply(obj);
+    }
 }
 
 
@@ -79,7 +94,10 @@ void channel::reply(const object &obj) {
 }
 
 void channel::set_reciever(node *other) {
-    remote = other;
+    if (other) {
+        other->register_channel(this);
+        remote = other;
+    }
 }
 
 

@@ -12,6 +12,11 @@ object::object()
 }
 
 
+object::object(bool data)
+    :
+    value_ptr(std::make_shared<value<value_type::bool_type>>(data)) {
+}
+
 object::object(const char *data)
 	:
 	value_ptr(std::make_shared<value<value_type::string_type>>(data)) {
@@ -59,6 +64,33 @@ const object &object::operator[](const std::string &key) const {
 	}
 	return *this;
 }
+
+
+value<value_type::bool_type>::value(bool v)
+	:
+	stored_value(v) {
+}
+
+
+value_type value<value_type::bool_type>::type() const {
+	return value_type::bool_type;
+}
+
+
+std::string value<value_type::bool_type>::str() const {
+	return stored_value ? "true" : "false";
+}
+
+
+std::string value<value_type::bool_type>::as_string() const {
+	return "";
+}
+
+
+const object &value<value_type::bool_type>::operator[](const std::string &key) const {
+	return object::static_null;
+}
+
 
 value<value_type::string_type>::value(const std::string &v)
 	:
@@ -119,6 +151,9 @@ std::string value<value_type::record_type>::as_string() const {
 }
 
 const object &value<value_type::record_type>::operator[](const std::string &key) const {
+    if (stored_value.count(key) == 0) {
+        return object::static_null;
+    }
 	return stored_value.at(key);
 }
 
