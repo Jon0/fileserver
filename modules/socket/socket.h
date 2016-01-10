@@ -21,7 +21,8 @@ public:
 
 	int acceptfd(sockaddr_in &cli_addr) const;
 
-	core::node *match(const core::node &from, const std::string &type) override;
+	void create_notify(core::node *other) override;
+	void remove_notify(core::node *other) override;
 	void recieve(core::channel &c, const core::object &obj) override;
 	void update() override;
 
@@ -40,7 +41,8 @@ public:
 	int fd() const;
 	bool is_open() const;
 
-	core::node *match(const core::node &from, const std::string &type) override;
+	void create_notify(core::node *other) override;
+	void remove_notify(core::node *other) override;
 	void recieve(core::channel &c, const core::object &obj) override;
 	void update() override;
 

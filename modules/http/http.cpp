@@ -20,23 +20,27 @@ httpctl::httpctl(core::engine &e)
     core::node(e, "httpctl") {
 }
 
-core::node *httpctl::match(const core::node &from, const std::string &type) {
-    if (type == "binary") {
-        return this;
-    }
-	return nullptr;
+void httpctl::create_notify(core::node *other) {
+
 }
 
+
+void httpctl::remove_notify(core::node *other) {
+
+}
+
+
 void httpctl::recieve(core::channel &c, const core::object &obj) {
-    if (obj["type"].as_string() == "binary") {
-        //for (auto n : get_engine().node_search(*this, "http")) {
-        //    channel_open(n);
-        //}
-        //send_all(read_request(obj));
-        c.reply(read_response(read_request(obj)));
+    if (c.is_reply(this)) {
+
+        // find the correct socket
+        std::string return_to = obj["node"].as_string();
+        reply(return_to, "tcp", read_response(obj));
     }
     else {
-        //reply_all(read_response(obj));
+        if (obj["type"].as_string() == "binary") {
+            event("http", read_request(obj));
+        }
     }
 }
 
@@ -60,6 +64,7 @@ core::object read_request(const core::object &obj) {
     std::vector<std::string> lines = split(obj["data"].as_string(), '\n');
     core::object::record data;
     data.insert(std::make_pair("type", "http"));
+    data.insert(std::make_pair("node", obj["node"].as_string()));
     data.insert(std::make_pair("source", obj));
 
     // parse http request

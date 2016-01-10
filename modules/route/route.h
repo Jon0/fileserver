@@ -16,9 +16,17 @@ class routectl : public core::node {
 public:
     routectl(core::engine &e);
 
-    core::node *match(const core::node &from, const std::string &type) override;
+    void handle_get(const core::object &obj);
+
+    void create_notify(core::node *other) override;
+    void remove_notify(core::node *other) override;
     void recieve(core::channel &c, const core::object &obj) override;
     void update() override;
+
+private:
+    bool enable_info;
+    int request_count;
+
 };
 
 }

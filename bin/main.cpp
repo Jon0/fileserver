@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <core/engine.h>
-#include <fileserver/server.h>
+#include <common/server.h>
 
 int main(int argc, char *argv[]) {
 	core::engine e;

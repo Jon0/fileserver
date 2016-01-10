@@ -22,10 +22,13 @@ public:
 
     engine &get_engine();
     std::string get_name() const;
+    int channel_count() const;
 
-    channel *channel_open(node *other);
+    channel *channel_open(const std::string &type, node *other);
+    void channel_close(node *other);
     void register_channel(channel *c);
-    void remove_notify(node *other);
+
+
 
     // ensure updates can only access the owned channels
     std::vector<channel *> owned_channels() const;
@@ -33,10 +36,16 @@ public:
     void send_all(const object &obj);
     void reply_all(const object &obj);
 
+    // pass message to this object
     void msg(channel &remote, const object &obj);
 
+    // process events
+    void event(const std::string &type, const object &obj);
+    void reply(const std::string &name, const std::string &type, const object &obj);
+
     // these should be private implementations
-    virtual node *match(const node &from, const std::string &type) = 0;
+    virtual void create_notify(node *other) = 0;
+    virtual void remove_notify(node *other) = 0;
     virtual void recieve(channel &c, const object &obj) = 0;
     virtual void update() = 0;
 
@@ -64,18 +73,22 @@ private:
  */
 class channel {
 public:
-    channel(node &owner);
+    channel(const std::string &type, node &owner);
 
     node &owner;
     node *remote;
-    const std::string name;
 
     /**
      * these could become objects
      */
-    std::string content_type;
-    std::string in_type;
-    std::string out_type;
+    const std::string content_type;
+    const std::string send_name;
+    std::string reply_name;
+
+    bool is_reply(node *other) const;
+
+    std::string get_name() const;
+    std::string get_type() const;
 
     node *get_reciever() const;
     void set_reciever(node *other);

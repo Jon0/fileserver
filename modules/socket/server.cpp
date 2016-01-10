@@ -22,19 +22,16 @@ socketctl::socketctl(core::engine &e)
 }
 
 
-core::node *socketctl::match(const core::node &from, const std::string &type) {
-	return nullptr;
-}
+void socketctl::create_notify(core::node *other) {}
 
 
-void socketctl::recieve(core::channel &c, const core::object &obj) {
-
-}
+void socketctl::remove_notify(core::node *other) {}
 
 
-void socketctl::update() {
+void socketctl::recieve(core::channel &c, const core::object &obj) {}
 
-}
+
+void socketctl::update() {}
 
 
 }

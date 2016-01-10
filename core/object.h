@@ -24,6 +24,7 @@ public:
 	virtual value_type type() const = 0;
 	virtual std::string str() const = 0;
 
+	virtual int as_int() const = 0;
 	virtual std::string as_string() const = 0;
 	virtual const object &operator[](const std::string &key) const = 0;
 };
@@ -36,6 +37,7 @@ public:
 
 	object();
 	object(bool data);
+	object(int data);
 	object(const char *data);
 	object(const std::string &data);
 	object(const record &data);
@@ -68,6 +70,7 @@ public:
 	value_type type() const override;
 	std::string str() const override;
 
+	int as_int() const override;
 	std::string as_string() const override;
 	const object &operator[](const std::string &key) const override;
 
@@ -77,7 +80,32 @@ public:
 template<>
 class value<value_type::int_type> : public value_base {
 public:
-	int v;
+	value(int v);
+
+	value_type type() const override;
+	std::string str() const override;
+
+	int as_int() const override;
+	std::string as_string() const override;
+	const object &operator[](const std::string &key) const override;
+
+	const int stored_value;
+};
+
+
+template<>
+class value<value_type::array_type> : public value_base {
+public:
+	value(const object::array &v);
+
+	value_type type() const override;
+	std::string str() const override;
+
+	int as_int() const override;
+	std::string as_string() const override;
+	const object &operator[](const std::string &key) const override;
+
+	const object::array stored_value;
 };
 
 template<>
@@ -88,6 +116,7 @@ public:
 	value_type type() const override;
 	std::string str() const override;
 
+	int as_int() const override;
 	std::string as_string() const override;
 	const object &operator[](const std::string &key) const override;
 
@@ -102,6 +131,7 @@ public:
 	value_type type() const override;
 	std::string str() const override;
 
+	int as_int() const override;
 	std::string as_string() const override;
 	const object &operator[](const std::string &key) const override;
 

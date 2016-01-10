@@ -87,8 +87,13 @@ int tcp_acceptor::acceptfd(sockaddr_in &cli_addr) const {
 }
 
 
-core::node *tcp_acceptor::match(const core::node &from, const std::string &type) {
-	return nullptr;
+void tcp_acceptor::create_notify(core::node *other) {
+
+}
+
+
+void tcp_acceptor::remove_notify(core::node *other) {
+
 }
 
 
@@ -111,9 +116,9 @@ void tcp_acceptor::update() {
 			tcp_socket *s = sockets.back().get();
 
 			// find a recieving channel
-			for (auto n : get_engine().node_search(*this, "binary")) {
-				s->channel_open(n);
-			}
+			//for (auto n : get_engine().node_search(*this, "binary")) {
+			//	s->channel_open(n);
+			//}
 		}
 	}
 
@@ -156,9 +161,10 @@ bool tcp_socket::is_open() const {
 }
 
 
-core::node *tcp_socket::match(const core::node &from, const std::string &type) {
-	return nullptr;
-}
+void tcp_socket::create_notify(core::node *other) {}
+
+
+void tcp_socket::remove_notify(core::node *other) {}
 
 
 void tcp_socket::recieve(core::channel &c, const core::object &obj) {
@@ -191,7 +197,7 @@ void tcp_socket::update() {
 		std::cout << "updating closed socket\n";
 		return;
 	}
-	if (readyfd(sockfd)) {
+	else if (readyfd(sockfd)) {
 
 		// report raw data
 		char buffer[1024];
@@ -207,11 +213,12 @@ void tcp_socket::update() {
 		else if (n) {
 			core::object::record data = {
 				{"type", "binary"},
+				{"node", get_name()},
 				{"ipv4", ipv4_str},
 				{"port", port_str},
 				{"data", std::string(buffer, n)}
 			};
-			send_all(data);
+			event("tcp", data);
 		}
 	}
 }

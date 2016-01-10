@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -27,13 +28,7 @@ public:
     void node_open(node *n);
     void node_close(node *n);
 
-    /**
-     * find matching nodes
-     * objects may work better than strings
-     */
-    std::vector<node *> node_search(const node &from, const std::string &type);
-
-    void thread_start(std::function<void()> handler);
+    node *node_get(const std::string &name);
 
 private:
     void open_module(const std::string &module_path);
@@ -44,13 +39,11 @@ private:
 
     // list of open channels
     std::vector<node *> nodes;
+    std::unordered_set<node *> to_create;
     std::unordered_set<node *> to_remove;
 
     // list of connected modules
     std::vector<std::unique_ptr<module>> modules;
-
-    // running threads
-    std::vector<std::thread> thread_pool;
 
 };
 

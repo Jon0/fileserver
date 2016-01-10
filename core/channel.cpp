@@ -29,21 +29,21 @@ std::string node::get_name() const {
 }
 
 
-channel *node::channel_open(node *other) {
+int node::channel_count() const {
+    return channels.size();
+}
+
+
+channel *node::channel_open(const std::string &type, node *other) {
     std::cout << "[" << name << "] connecting to " << other->get_name() << "\n";
-    channels.emplace_back(std::make_unique<channel>(*this));
+    channels.emplace_back(std::make_unique<channel>(type, *this));
     channel *opened_channel = channels.back().get();
     opened_channel->set_reciever(other);
     return opened_channel;
 }
 
 
-void node::register_channel(channel *c) {
-    reply_channels.push_back(c);
-}
-
-
-void node::remove_notify(node *other) {
+void node::channel_close(node *other) {
     channels.erase(
         std::remove_if(
             channels.begin(),
@@ -62,6 +62,11 @@ void node::remove_notify(node *other) {
             }),
         reply_channels.end()
     );
+}
+
+
+void node::register_channel(channel *c) {
+    reply_channels.push_back(c);
 }
 
 
@@ -93,15 +98,41 @@ void node::reply_all(const object &obj) {
 
 
 void node::msg(channel &c, const object &obj) {
-    std::cout<< "[" << name << "] " << obj.str() << "\n";
+    std::cout << "[" << name << "] " << obj.str() << "\n";
     recieve(c, obj);
 }
 
 
-channel::channel(node &owner)
+void node::event(const std::string &type, const object &obj) {
+    // pass event to required channels
+    // events only trigger owned channels?
+    bool data_sent = false;
+    for (auto &c : channels) {
+        if (c->get_type() == type) {
+            c->send(obj);
+            data_sent = true;
+        }
+    }
+
+    if (!data_sent) {
+        std::cout << "[" << name << "] " << type << " event was ignored\n";
+    }
+}
+
+void node::reply(const std::string &name, const std::string &type, const object &obj) {
+    std::cout << "there are " << reply_channels.size() << " return channels\n";
+    for (channel *c : reply_channels) {
+        if (c->get_name() == name && c->get_type() == type) {
+            c->reply(obj);
+        }
+    }
+}
+
+
+channel::channel(const std::string &type, node &owner)
     :
     owner(owner),
-    name("unnamed") {
+    content_type(type) {
 }
 
 
@@ -114,6 +145,23 @@ void channel::send(const object &obj) {
 
 void channel::reply(const object &obj) {
     owner.msg(*this, obj);
+}
+
+
+bool channel::is_reply(node *other) const {
+    return other == &owner;
+}
+
+
+std::string channel::get_name() const {
+
+    // channel name matches the owner
+    return owner.get_name();
+}
+
+
+std::string channel::get_type() const {
+    return content_type;
 }
 
 

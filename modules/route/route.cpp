@@ -21,40 +21,54 @@ routectl::routectl(core::engine &e)
 }
 
 
-core::node *routectl::match(const core::node &from, const std::string &type) {
-    if (type == "http") {
-        return this;
+void routectl::handle_get(const core::object &obj) {
+    std::string url = obj["url"].as_string();
+    std::cout << "http request for " << url << " recieved\n";
+    std::string ss = url.substr(1);
+    node *matched_node = get_engine().node_get(ss);
+
+    // get status of other nodes
+    if (matched_node) {
+        core::object::record data = {
+            {"node", obj["node"].as_string()},
+            {"type", "info"},
+            {"info", enable_info},
+            {"count", request_count++}
+        };
+        reply("httpctl", "http", data);
     }
-    return nullptr;
+    else {
+        core::object::record data = {
+            {"node", obj["node"].as_string()},
+            {"type", "path"},
+            {"source", obj},
+            {"path", url},
+            {"action", "open"},
+        };
+        event("route", data);
+    }
 }
+
+
+void routectl::create_notify(core::node *other) {}
+
+
+void routectl::remove_notify(core::node *other) {}
 
 
 void routectl::recieve(core::channel &c, const core::object &obj) {
-    if (obj.type() == core::value_type::record_type) {
-        if (obj["type"].as_string() == "http") {
-            std::string url = obj["url"].as_string();
-            std::cout << "request for " << url << " recieved\n";
-
-            // find a recieving channel
-            for (auto n : get_engine().node_search(*this, "path")) {
-                channel_open(n);
-            }
-            core::object::record data = {
-                {"type", "path"},
-                {"source", obj},
-                {"path", url},
-                {"action", "metadata"},
-            };
-            send_all(data);
+    if (c.is_reply(this)) {
+        if (obj["type"].as_string() == "file") {
+            reply("httpctl", "http", obj);
         }
-        else {
-            reply_all(obj);
+    }
+    else {
+        if (obj["type"].as_string() == "http") {
+            handle_get(obj);
         }
     }
 }
 
-void routectl::update() {
-
-}
+void routectl::update() {}
 
 }

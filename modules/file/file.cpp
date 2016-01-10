@@ -21,20 +21,27 @@ filectl::filectl(core::engine &e)
 }
 
 
-core::node *filectl::match(const core::node &from, const std::string &type) {
-    if (type == "path") {
-        return this;
-    }
-    return nullptr;
+void filectl::create_notify(core::node *other) {
+
+}
+
+
+void filectl::remove_notify(core::node *other) {
+
 }
 
 
 void filectl::recieve(core::channel &c, const core::object &obj) {
     std::string path = obj["path"].as_string();
     if (!path.empty()) {
-        std::cout << "request for " << path << " recieved\n";
+        std::cout << "file request for " << path << " recieved\n";
         location loc(path);
-        c.reply(loc.as_object());
+        core::object::record data = {
+            {"type", "file"},
+            {"node", obj["node"].as_string()},
+            {"metadata", loc.as_object()},
+        };
+        c.reply(data);
     }
 }
 

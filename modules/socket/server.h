@@ -20,7 +20,8 @@ class socketctl : public core::node {
 public:
     socketctl(core::engine &e);
 
-    core::node *match(const core::node &from, const std::string &type) override;
+    void create_notify(core::node *other) override;
+    void remove_notify(core::node *other) override;
     void recieve(core::channel &c, const core::object &obj) override;
     void update() override;
 
