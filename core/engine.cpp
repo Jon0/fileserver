@@ -15,6 +15,7 @@ engine::engine()
         "modules/log/liblog.so",
         "modules/route/libroute.so",
         "modules/socket/libsocket.so",
+        "modules/template/libtemplate.so",
     }) {}
 
 

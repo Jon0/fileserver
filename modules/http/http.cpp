@@ -3,56 +3,56 @@
 
 #include "http.h"
 
+
 std::unique_ptr<core::node> hctl;
+
 
 void http_init(core::engine &e) {
     hctl = std::make_unique<http::httpctl>(e);
 }
 
+
 void http_uninit(core::engine &e) {
     hctl = nullptr;
 }
 
+
 namespace http {
+
 
 httpctl::httpctl(core::engine &e)
     :
     core::node(e, "httpctl") {
 }
 
-void httpctl::create_notify(core::node *other) {
 
-}
+void httpctl::create_notify(core::node *other) {}
 
 
-void httpctl::remove_notify(core::node *other) {
-
-}
+void httpctl::remove_notify(core::node *other) {}
 
 
 void httpctl::recieve(core::channel &c, const core::object &obj) {
-    if (c.is_reply(this)) {
-
-        // find the correct socket
+    if (obj["type"].as_string() == "binary") {
+        event("http", read_request(obj));
+    }
+    else {
         std::string return_to = obj["node"].as_string();
         reply(return_to, "tcp", read_response(obj));
     }
-    else {
-        if (obj["type"].as_string() == "binary") {
-            event("http", read_request(obj));
-        }
-    }
 }
 
-void httpctl::update() {
 
-}
+void httpctl::update() {}
+
 
 core::object read_response(const core::object &obj) {
     core::object::record data;
     data.insert(std::make_pair("type", "binary"));
-    std::string content = obj.str();
+    std::string mime_type = "text/html";
+    std::string content = obj["data"].as_string();
     std::string header = "HTTP/1.1 200 OK\n";
+	header += "Content-Type: " + mime_type + "\n";
     header += "Content-Length: " + std::to_string(content.length()) + "\n";
     header += "\n";
     data.insert(std::make_pair("data", header + content));
@@ -64,7 +64,7 @@ core::object read_request(const core::object &obj) {
     std::vector<std::string> lines = split(obj["data"].as_string(), '\n');
     core::object::record data;
     data.insert(std::make_pair("type", "http"));
-    data.insert(std::make_pair("node", obj["node"].as_string()));
+    data.insert(std::make_pair("node", obj["node"]));
     data.insert(std::make_pair("source", obj));
 
     // parse http request

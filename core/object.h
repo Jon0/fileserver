@@ -7,7 +7,7 @@
 
 namespace core {
 
-class object;
+class value_base;
 
 enum class value_type {
 	null_type,
@@ -19,17 +19,6 @@ enum class value_type {
 };
 
 
-class value_base {
-public:
-	virtual value_type type() const = 0;
-	virtual std::string str() const = 0;
-
-	virtual int as_int() const = 0;
-	virtual std::string as_string() const = 0;
-	virtual const object &operator[](const std::string &key) const = 0;
-};
-
-
 class object {
 public:
 	using array = std::vector<object>;
@@ -38,6 +27,7 @@ public:
 	object();
 	object(bool data);
 	object(int data);
+	object(const array &data);
 	object(const char *data);
 	object(const std::string &data);
 	object(const record &data);
@@ -46,13 +36,30 @@ public:
 	std::string str() const;
 
 	std::string as_string() const;
+	record as_record() const;
 	const object &operator[](const std::string &key) const;
 
-	std::string data;
-	std::shared_ptr<value_base> value_ptr;
-
 	static const object static_null;
+
+private:
+	std::shared_ptr<value_base> value_ptr;
 };
+
+/**
+ * implement defualts here so type objects
+ * don't need to reimplement the same thing
+ */
+class value_base {
+public:
+	virtual value_type type() const = 0;
+	virtual std::string str() const = 0;
+
+	virtual int as_int() const = 0;
+	virtual std::string as_string() const = 0;
+	virtual object::record as_record() const = 0;
+	virtual const object &operator[](const std::string &key) const = 0;
+};
+
 
 template<value_type T>
 class value;
@@ -72,6 +79,7 @@ public:
 
 	int as_int() const override;
 	std::string as_string() const override;
+	object::record as_record() const override;
 	const object &operator[](const std::string &key) const override;
 
 	const bool stored_value;
@@ -87,6 +95,7 @@ public:
 
 	int as_int() const override;
 	std::string as_string() const override;
+	object::record as_record() const override;
 	const object &operator[](const std::string &key) const override;
 
 	const int stored_value;
@@ -103,6 +112,7 @@ public:
 
 	int as_int() const override;
 	std::string as_string() const override;
+	object::record as_record() const override;
 	const object &operator[](const std::string &key) const override;
 
 	const object::array stored_value;
@@ -118,6 +128,7 @@ public:
 
 	int as_int() const override;
 	std::string as_string() const override;
+	object::record as_record() const override;
 	const object &operator[](const std::string &key) const override;
 
 	const std::string stored_value;
@@ -133,6 +144,7 @@ public:
 
 	int as_int() const override;
 	std::string as_string() const override;
+	object::record as_record() const override;
 	const object &operator[](const std::string &key) const override;
 
 	const object::record stored_value;

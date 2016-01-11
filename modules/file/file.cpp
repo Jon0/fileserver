@@ -1,4 +1,9 @@
+#include <fstream>
 #include <iostream>
+#include <sstream>
+
+#include <dirent.h>
+#include <sys/types.h>
 
 #include "file.h"
 
@@ -32,7 +37,7 @@ void filectl::remove_notify(core::node *other) {
 
 
 void filectl::recieve(core::channel &c, const core::object &obj) {
-    std::string path = obj["path"].as_string();
+    std::string path = "." + obj["path"].as_string();
     if (!path.empty()) {
         std::cout << "file request for " << path << " recieved\n";
         location loc(path);
@@ -41,7 +46,15 @@ void filectl::recieve(core::channel &c, const core::object &obj) {
             {"node", obj["node"].as_string()},
             {"metadata", loc.as_object()},
         };
-        c.reply(data);
+        if (loc.exists()) {
+            if (loc.isdir()) {
+                data.insert({"dirdata", read_dir(path)});
+            }
+            else {
+                data.insert({"filedata", read_file(path)});
+            }
+        }
+        event("file", data);
     }
 }
 
@@ -139,6 +152,38 @@ core::object location::as_object() const {
             {"mode", mode()},
     };
     return data;
+}
+
+
+core::object read_dir(const std::string &path) {
+    core::object::array filenames;
+
+	DIR *dir;
+	struct dirent *ent;
+	if ((dir = opendir(path.c_str())) != NULL) {
+
+		/* print all the files and directories within directory */
+		while ((ent = readdir(dir)) != NULL) {
+			std::string filename = ent->d_name;
+			if (!filename.empty()) {
+				filenames.push_back(filename);
+			}
+		}
+		closedir(dir);
+	}
+	else {
+		/* could not open directory */
+	}
+
+	return filenames;
+}
+
+
+std::string read_file(const std::string &filename) {
+	std::ifstream t(filename);
+	std::stringstream ss;
+	ss << t.rdbuf();
+	return ss.str();
 }
 
 

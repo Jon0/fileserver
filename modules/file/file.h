@@ -14,6 +14,7 @@ void file_uninit(core::engine &e);
 
 namespace file {
 
+
 class filectl : public core::node {
 public:
     filectl(core::engine &e);
@@ -23,6 +24,7 @@ public:
     void recieve(core::channel &c, const core::object &obj) override;
     void update() override;
 };
+
 
 class location {
 public:
@@ -58,5 +60,14 @@ private:
 	struct stat location_stat;
 
 };
+
+core::object read_dir(const std::string &path);
+
+
+/**
+ * read a whole file into a string
+ */
+std::string read_file(const std::string &filename);
+
 
 }

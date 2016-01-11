@@ -21,7 +21,9 @@ flowctl::flowctl(core::engine &e)
     links = {
         std::make_tuple("httpctl", "routectl", "http"),
         std::make_tuple("routectl", "filectl", "route"),
-        std::make_tuple("routectl", "httpctl", "status")
+        std::make_tuple("routectl", "httpctl", "status"),
+        std::make_tuple("filectl", "templatectl", "file"),
+        std::make_tuple("templatectl", "httpctl", "http")
     };
 }
 

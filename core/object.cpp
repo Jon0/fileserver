@@ -24,6 +24,12 @@ object::object(int data)
 }
 
 
+object::object(const array &data)
+    :
+    value_ptr(std::make_shared<value<value_type::array_type>>(data)) {
+}
+
+
 object::object(const char *data)
 	:
 	value_ptr(std::make_shared<value<value_type::string_type>>(data)) {
@@ -65,6 +71,14 @@ std::string object::as_string() const {
 }
 
 
+object::record object::as_record() const {
+	if (value_ptr) {
+		return value_ptr->as_record();
+	}
+	return record();
+}
+
+
 const object &object::operator[](const std::string &key) const {
 	if (value_ptr) {
 		return (*value_ptr)[key];
@@ -99,6 +113,11 @@ std::string value<value_type::bool_type>::as_string() const {
 }
 
 
+object::record value<value_type::bool_type>::as_record() const {
+    return object::record();
+}
+
+
 const object &value<value_type::bool_type>::operator[](const std::string &key) const {
 	return object::static_null;
 }
@@ -127,6 +146,11 @@ int value<value_type::int_type>::as_int() const {
 
 std::string value<value_type::int_type>::as_string() const {
 	return "";
+}
+
+
+object::record value<value_type::int_type>::as_record() const {
+    return object::record();
 }
 
 
@@ -173,6 +197,11 @@ std::string value<value_type::array_type>::as_string() const {
 }
 
 
+object::record value<value_type::array_type>::as_record() const {
+    return object::record();
+}
+
+
 const object &value<value_type::array_type>::operator[](const std::string &key) const {
 	return object::static_null;
 }
@@ -201,6 +230,11 @@ int value<value_type::string_type>::as_int() const {
 
 std::string value<value_type::string_type>::as_string() const {
 	return stored_value;
+}
+
+
+object::record value<value_type::string_type>::as_record() const {
+    return object::record();
 }
 
 
@@ -245,6 +279,12 @@ int value<value_type::record_type>::as_int() const {
 std::string value<value_type::record_type>::as_string() const {
 	return "";
 }
+
+
+object::record value<value_type::record_type>::as_record() const {
+    return stored_value;
+}
+
 
 const object &value<value_type::record_type>::operator[](const std::string &key) const {
     if (stored_value.count(key) == 0) {

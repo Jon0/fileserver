@@ -30,7 +30,7 @@ void routectl::handle_get(const core::object &obj) {
     // get status of other nodes
     if (matched_node) {
         core::object::record data = {
-            {"node", obj["node"].as_string()},
+            {"node", obj["node"]},
             {"type", "info"},
             {"info", enable_info},
             {"count", request_count++}
@@ -39,7 +39,7 @@ void routectl::handle_get(const core::object &obj) {
     }
     else {
         core::object::record data = {
-            {"node", obj["node"].as_string()},
+            {"node", obj["node"]},
             {"type", "path"},
             {"source", obj},
             {"path", url},
@@ -57,15 +57,8 @@ void routectl::remove_notify(core::node *other) {}
 
 
 void routectl::recieve(core::channel &c, const core::object &obj) {
-    if (c.is_reply(this)) {
-        if (obj["type"].as_string() == "file") {
-            reply("httpctl", "http", obj);
-        }
-    }
-    else {
-        if (obj["type"].as_string() == "http") {
-            handle_get(obj);
-        }
+    if (obj["type"].as_string() == "http") {
+        handle_get(obj);
     }
 }
 
