@@ -25,6 +25,7 @@ public:
     void remove_notify(core::node *other) override;
     void recieve(core::channel &c, const core::object &obj) override;
     void update() override;
+    core::object transform(const core::object &obj) const override;
 
 private:
     void make_link(core::node *from, core::node *to, const std::string &type);

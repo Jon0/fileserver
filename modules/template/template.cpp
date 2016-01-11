@@ -21,29 +21,49 @@ templatectl::templatectl(core::engine &e)
 }
 
 
-core::object obj_template(const core::object &obj) {
-    std::string page = "<table>\n";
-    for (auto &o : obj.as_record()) {
-        page += "<tr>" + o.first + "</tr>\n";
+core::object templatectl::obj_template(const core::object &obj) {
+    std::string result;
+    result += "<h1>Index of " + obj["metadata"]["path"].as_string() + "</h1>";
+    result += "<h2>Type " + obj["type"].as_string() + "</h2>";
+    result += "<table>";
+    result += "<tr>";
+    result += "<th valign=\"top\"></th><th><a>Name</a></th><th><a>Last modified</a></th><th><a>Size</a></th><th><a>Description</a></th>";
+    result += "</tr>";
+    result += "<tr><th colspan=\"5\"><hr></th></tr>";
+
+    for (auto &s : obj.as_record()) {
+        std::string link = obj["metadata"]["path"].as_string();
+        result += "<tr>";
+        result += "<td valign=\"top\"></td><td><a href="+ link +">" + s.first + "</a></td>";
+        result += "<td align=\"right\">?</td>";
+        result += "<td align=\"right\">?</td>";
+            result += "<td align=\"right\">?</td>";
+            result += "</tr>";
     }
-    page += "</table>\n";
+    result += "<tr><th colspan=\"5\"><hr></th></tr>";
+    result += "</table>";
 
     core::object::record data = {
         {"node", obj["node"]},
         {"type", "http"},
-        {"data", page},
+        {"data", result},
     };
     return data;
 }
 
 
 core::object templatectl::page_template(const core::object &obj) {
-    core::object::record data = {
-        {"node", obj["node"]},
-        {"type", "http"},
-        {"data", obj["filedata"]},
-    };
-    return data;
+    if (obj["filedata"].is_null()) {
+        return obj_template(obj);
+    }
+    else {
+        core::object::record data = {
+            {"node", obj["node"]},
+            {"type", "http"},
+            {"data", obj["filedata"]},
+        };
+        return data;
+    }
 }
 
 
@@ -65,6 +85,11 @@ void templatectl::recieve(core::channel &c, const core::object &obj) {
 
 
 void templatectl::update() {
+
+}
+
+
+core::object templatectl::transform(const core::object &obj) const {
 
 }
 

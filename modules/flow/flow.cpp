@@ -63,9 +63,13 @@ void flowctl::update() {
 }
 
 
+core::object flowctl::transform(const core::object &obj) const {
+
+}
+
+
 void flowctl::make_link(core::node *from, core::node *to, const std::string &type) {
     if (from && to) {
-        std::cout << "create " << type << " channel to " << to->get_name() << "\n";
         from->channel_open(type, to);
     }
 }

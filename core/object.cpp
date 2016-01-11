@@ -48,6 +48,14 @@ object::object(const record &data)
 }
 
 
+bool object::is_null() const {
+    if (value_ptr) {
+        return false;
+    }
+    return true;
+}
+
+
 value_type object::type() const {
 	if (value_ptr) {
 		return value_ptr->type();

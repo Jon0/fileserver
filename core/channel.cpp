@@ -98,7 +98,7 @@ void node::reply_all(const object &obj) {
 
 
 void node::msg(channel &c, const object &obj) {
-    std::cout << "[" << name << "] " << obj.str() << "\n";
+    std::cout << "[" << name << "] recieve " << c.get_type() << "\n";
     recieve(c, obj);
 }
 

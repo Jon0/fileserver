@@ -134,6 +134,11 @@ void tcp_acceptor::update() {
 }
 
 
+core::object tcp_acceptor::transform(const core::object &obj) const {
+
+}
+
+
 tcp_socket::tcp_socket(core::engine &e, int fd, const std::string &name, const sockaddr_in &cli_addr)
 	:
 	core::node(e, name),
@@ -221,6 +226,11 @@ void tcp_socket::update() {
 			event("tcp", data);
 		}
 	}
+}
+
+
+core::object tcp_socket::transform(const core::object &obj) const {
+
 }
 
 

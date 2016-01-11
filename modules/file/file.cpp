@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <dirent.h>
+#include <fcntl.h>
 #include <sys/types.h>
 
 #include "file.h"
@@ -20,99 +21,58 @@ void file_uninit(core::engine &e) {
 namespace file {
 
 
-filectl::filectl(core::engine &e)
-    :
-    core::node(e, "filectl") {
-}
-
-
-void filectl::create_notify(core::node *other) {
-
-}
-
-
-void filectl::remove_notify(core::node *other) {
-
-}
-
-
-void filectl::recieve(core::channel &c, const core::object &obj) {
-    std::string path = "." + obj["path"].as_string();
-    if (!path.empty()) {
-        std::cout << "file request for " << path << " recieved\n";
-        location loc(path);
-        core::object::record data = {
-            {"type", "file"},
-            {"node", obj["node"].as_string()},
-            {"metadata", loc.as_object()},
-        };
-        if (loc.exists()) {
-            if (loc.isdir()) {
-                data.insert({"dirdata", read_dir(path)});
-            }
-            else {
-                data.insert({"filedata", read_file(path)});
-            }
-        }
-        event("file", data);
-    }
-}
-
-
-void filectl::update() {
-
-}
-
-
-location::location(const std::string &path)
+path::path(core::engine &e, const std::string &path, const std::string &ret)
 	:
+    core::node(e, path),
 	filepath(path),
+    return_node(ret),
+    location_fd(open(path.c_str(), O_RDONLY)),
 	location_exists(stat(path.c_str(), &location_stat)) {
 }
 
 
-bool location::exists() const {
-	return location_exists >= 0;
+bool path::exists() const {
+    return location_exists >= 0;
 }
 
 
-bool location::isdir() const {
-	return S_ISDIR(location_stat.st_mode);
+bool path::isdir() const {
+    return S_ISDIR(location_stat.st_mode);
 }
 
 
-bool location::ischr() const {
+bool path::ischr() const {
 	return S_ISCHR(location_stat.st_mode);
 }
 
 
-bool location::isexec() const {
-	return (location_stat.st_mode & S_IXUSR);
+bool path::isexec() const {
+    return (location_stat.st_mode & S_IXUSR);
 }
 
 
-int location::size() const {
+int path::size() const {
 	return location_stat.st_size;
 }
 
 
-int location::device() const {
+int path::device() const {
 		return location_stat.st_rdev;
 }
 
 
-std::string location::sizestr() const {
+std::string path::sizestr() const {
 	return std::to_string(size());
 }
 
-std::string location::modified() const {
+std::string path::modified() const {
 	return std::to_string(location_stat.st_mtime);
 }
 
 
-std::string location::mode() const {
-	std::string result;
-	result += ( isdir() ? "d" : "-");
+std::string path::mode() const {
+    std::string result;
+    result += ( isdir() ? "d" : "-");
     result += ( (location_stat.st_mode & S_IRUSR) ? "r" : "-");
     result += ( (location_stat.st_mode & S_IWUSR) ? "w" : "-");
     result += ( (location_stat.st_mode & S_IXUSR) ? "x" : "-");
@@ -126,32 +86,102 @@ std::string location::mode() const {
 }
 
 
-std::string location::path() const {
+std::string path::str() const {
 	return filepath;
 }
 
 
-location location::append(const std::string &path) const {
-	if (filepath.back() != '/' && path.front() != '/') {
-		return location(filepath + "/" + path);
-	}
-	else {
-		return location(filepath + path);
-	}
+std::string path::append(const std::string &pathstr) {
+    if (filepath.back() != '/' && pathstr.front() != '/') {
+    	return filepath + "/" + pathstr;
+    }
+    else {
+        return filepath + pathstr;
+    }
 }
 
 
-core::object location::as_object() const {
+core::object path::as_object() const {
 
     // include directory content
     // or include filedata
     core::object::record data = {
-            {"path", path()},
+            {"path", str()},
             {"exists", exists()},
             {"isdir", isdir()},
             {"mode", mode()},
+            {"size", size()},
     };
     return data;
+}
+
+
+void path::create_notify(core::node *other) {}
+
+
+void path::remove_notify(core::node *other) {}
+
+
+void path::recieve(core::channel &c, const core::object &obj) {
+    /**
+     * metadata requests should be queued
+     */
+    core::object::record data = {
+        {"type", "file"},
+        {"node", return_node},
+        {"metadata", as_object()},
+    };
+    event("file", data);
+}
+
+
+void path::update() {
+    if (exists()) {
+        // if (isdir()) {
+        //     data.insert({"dirdata", read_dir(filepath)});
+        // }
+        // else {
+        //     data.insert({"filedata", read_file(filepath)});
+        // }
+    }
+    //event("file", data);
+}
+
+
+core::object path::transform(const core::object &obj) const {
+
+}
+
+
+filectl::filectl(core::engine &e)
+    :
+    core::node(e, "filectl") {
+}
+
+
+void filectl::create_notify(core::node *other) {}
+
+
+void filectl::remove_notify(core::node *other) {}
+
+
+void filectl::recieve(core::channel &c, const core::object &obj) {
+    std::string pathstr = "." + obj["path"].as_string();
+    if (!pathstr.empty()) {
+        std::cout << "file request for " << pathstr << " recieved\n";
+        paths.emplace_back(std::make_unique<path>(get_engine(), pathstr, obj["node"].as_string()));
+        path *p = paths.back().get();
+        p->channel_open("file", get_engine().node_get("templatectl"));
+        p->msg(c, obj);
+    }
+}
+
+
+void filectl::update() {}
+
+
+core::object filectl::transform(const core::object &obj) const {
+
 }
 
 

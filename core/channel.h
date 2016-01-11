@@ -49,6 +49,9 @@ public:
     virtual void recieve(channel &c, const object &obj) = 0;
     virtual void update() = 0;
 
+    // todo
+    virtual object transform(const object &obj) const = 0;
+
 private:
     engine &engi;
 

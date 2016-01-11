@@ -64,4 +64,8 @@ void routectl::recieve(core::channel &c, const core::object &obj) {
 
 void routectl::update() {}
 
+core::object routectl::transform(const core::object &obj) const {
+
+}
+
 }

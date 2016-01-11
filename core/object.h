@@ -32,6 +32,7 @@ public:
 	object(const std::string &data);
 	object(const record &data);
 
+	bool is_null() const;
 	value_type type() const;
 	std::string str() const;
 

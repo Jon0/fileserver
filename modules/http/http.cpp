@@ -46,6 +46,11 @@ void httpctl::recieve(core::channel &c, const core::object &obj) {
 void httpctl::update() {}
 
 
+core::object httpctl::transform(const core::object &obj) const {
+
+}
+
+
 core::object read_response(const core::object &obj) {
     core::object::record data;
     data.insert(std::make_pair("type", "binary"));

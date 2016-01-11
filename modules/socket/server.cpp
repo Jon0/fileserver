@@ -34,4 +34,8 @@ void socketctl::recieve(core::channel &c, const core::object &obj) {}
 void socketctl::update() {}
 
 
+core::object socketctl::transform(const core::object &obj) const {}
+
+
+
 }

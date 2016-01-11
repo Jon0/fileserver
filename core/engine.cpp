@@ -79,13 +79,17 @@ void engine::node_cleanup() {
     // this will always occur before the new
     // node is updated or recieves data
     for (node *newnode : to_create) {
-        for (node *existing : nodes) {
-            if (to_remove.count(existing) == 0) {
-                newnode->create_notify(existing);
-                existing->create_notify(newnode);
+        if (to_remove.count(newnode) == 0) {
+
+            // each valid new node gets registered
+            for (node *existing : nodes) {
+                if (to_remove.count(existing) == 0) {
+                    newnode->create_notify(existing);
+                    existing->create_notify(newnode);
+                }
             }
+            nodes.emplace_back(newnode);
         }
-        nodes.emplace_back(newnode);
     }
 
     for (node *rmnode : to_remove) {
