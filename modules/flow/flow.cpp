@@ -19,37 +19,26 @@ flowctl::flowctl(core::engine &e)
     :
     core::node(e, "flowctl") {
     links = {
+        std::make_tuple("socketctl", "httpctl", "tcp"),
+        std::make_tuple("accept8080", "httpctl", "tcp"),
         std::make_tuple("httpctl", "routectl", "http"),
         std::make_tuple("routectl", "filectl", "route"),
         std::make_tuple("routectl", "httpctl", "status"),
+        std::make_tuple("filectl", "templatectl", "dir"),
         std::make_tuple("filectl", "templatectl", "file"),
+        std::make_tuple("filectl", "httpctl", "chr"),
         std::make_tuple("templatectl", "httpctl", "http")
     };
 }
 
 
 void flowctl::create_notify(core::node *other) {
-    std::string other_name = other->get_name();
-
-    node *http = get_engine().node_get("httpctl");
-    if (http) {
-        std::cout << "create tcp channel\n";
-        other->channel_open("tcp", http);
-    }
-
-    for (auto &l : links) {
-        if (std::get<0>(l) == other_name) {
-            make_link(other, get_engine().node_get(std::get<1>(l)), std::get<2>(l));
-        }
-        else if (std::get<1>(l) == other_name) {
-            make_link(get_engine().node_get(std::get<0>(l)), other, std::get<2>(l));
-        }
-    }
+    name_match(other->get_name(), other);
 }
 
 
 void flowctl::remove_notify(core::node *other) {
-
+    connected.erase(other->get_name());
 }
 
 
@@ -65,6 +54,19 @@ void flowctl::update() {
 
 core::object flowctl::transform(const core::object &obj) const {
 
+}
+
+
+void flowctl::name_match(const std::string &name, core::node *n) {
+    for (auto &l : links) {
+        if (std::get<0>(l) == name && connected.count(std::get<1>(l)) > 0) {
+            make_link(n, get_engine().node_get(std::get<1>(l)), std::get<2>(l));
+        }
+        else if (std::get<1>(l) == name && connected.count(std::get<0>(l)) > 0) {
+            make_link(get_engine().node_get(std::get<0>(l)), n, std::get<2>(l));
+        }
+    }
+    connected.insert(name);
 }
 
 

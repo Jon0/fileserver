@@ -18,11 +18,13 @@ namespace file {
 class path : public core::node {
 public:
 	path(core::engine &e, const std::string &path, const std::string &ret);
+	~path();
 
 	bool exists() const;
 	bool isdir() const;
 	bool ischr() const ;
 	bool isexec() const;
+	bool read_complete() const;
 	int size() const;
 	int device() const;
 
@@ -42,10 +44,12 @@ public:
 
 private:
 	const std::string filepath;
-    const std::string return_node;
 	const int location_fd;
     const int location_exists;
 	struct stat location_stat;
+	const std::string return_channel;
+	const std::string return_node;
+	bool completed;
 
 
 };
@@ -67,13 +71,10 @@ private:
 };
 
 
+bool readyfd(int fd);
+
+
 core::object read_dir(const std::string &path);
-
-
-/**
- * read a whole file into a string
- */
-std::string read_file(const std::string &filename);
 
 
 }

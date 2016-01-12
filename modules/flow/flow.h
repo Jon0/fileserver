@@ -28,10 +28,12 @@ public:
     core::object transform(const core::object &obj) const override;
 
 private:
+    void name_match(const std::string &name, core::node *n);
     void make_link(core::node *from, core::node *to, const std::string &type);
 
     // list nodes which need linking, and a type
     std::vector<flow_type> links;
+    std::unordered_set<std::string> connected;
 
 };
 

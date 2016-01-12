@@ -87,19 +87,13 @@ int tcp_acceptor::acceptfd(sockaddr_in &cli_addr) const {
 }
 
 
-void tcp_acceptor::create_notify(core::node *other) {
-
-}
+void tcp_acceptor::create_notify(core::node *other) {}
 
 
-void tcp_acceptor::remove_notify(core::node *other) {
-
-}
+void tcp_acceptor::remove_notify(core::node *other) {}
 
 
-void tcp_acceptor::recieve(core::channel &c, const core::object &obj) {
-
-}
+void tcp_acceptor::recieve(core::channel &c, const core::object &obj) {}
 
 
 void tcp_acceptor::update() {
@@ -113,12 +107,7 @@ void tcp_acceptor::update() {
 		if (newfd >= 0) {
 			std::string name = get_name() + "-" + std::to_string(next_sock_id++);
 			sockets.emplace_back(std::make_unique<tcp_socket>(get_engine(), newfd, name, cli_addr));
-			tcp_socket *s = sockets.back().get();
-
-			// find a recieving channel
-			//for (auto n : get_engine().node_search(*this, "binary")) {
-			//	s->channel_open(n);
-			//}
+			sockets.back()->channel_copy_all(this);
 		}
 	}
 

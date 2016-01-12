@@ -25,6 +25,10 @@ public:
     void update() override;
     core::object transform(const core::object &obj) const override;
 
+private:
+    int size;
+    std::string content;
+
 };
 
 }

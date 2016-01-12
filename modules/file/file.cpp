@@ -1,9 +1,11 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 #include <dirent.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <sys/types.h>
 
 #include "file.h"
@@ -25,9 +27,17 @@ path::path(core::engine &e, const std::string &path, const std::string &ret)
 	:
     core::node(e, path),
 	filepath(path),
-    return_node(ret),
     location_fd(open(path.c_str(), O_RDONLY)),
-	location_exists(stat(path.c_str(), &location_stat)) {
+	location_exists(stat(path.c_str(), &location_stat)),
+    return_channel(ischr() ? "chr" : "file"),
+    return_node(ret),
+    completed(!exists()) {
+}
+
+path::~path() {
+    if (location_fd >= 0) {
+        close(location_fd);
+    }
 }
 
 
@@ -48,6 +58,11 @@ bool path::ischr() const {
 
 bool path::isexec() const {
     return (location_stat.st_mode & S_IXUSR);
+}
+
+
+bool path::read_complete() const {
+    return completed;
 }
 
 
@@ -109,6 +124,7 @@ core::object path::as_object() const {
             {"path", str()},
             {"exists", exists()},
             {"isdir", isdir()},
+            {"ischr", ischr()},
             {"mode", mode()},
             {"size", size()},
     };
@@ -122,29 +138,42 @@ void path::create_notify(core::node *other) {}
 void path::remove_notify(core::node *other) {}
 
 
-void path::recieve(core::channel &c, const core::object &obj) {
-    /**
-     * metadata requests should be queued
-     */
-    core::object::record data = {
-        {"type", "file"},
-        {"node", return_node},
-        {"metadata", as_object()},
-    };
-    event("file", data);
-}
+void path::recieve(core::channel &c, const core::object &obj) {}
 
 
 void path::update() {
-    if (exists()) {
-        // if (isdir()) {
-        //     data.insert({"dirdata", read_dir(filepath)});
-        // }
-        // else {
-        //     data.insert({"filedata", read_file(filepath)});
-        // }
+    if (exists() && !completed) {
+        core::object::record data = {
+            {"type", "file"},
+            {"node", return_node},
+            {"metadata", as_object()},
+        };
+        if (isdir()) {
+            data.insert({"dir", read_dir(filepath)});
+            event(return_channel, data);
+            completed = true;
+        }
+        else if (readyfd(location_fd)) {
+
+            // report raw data
+            constexpr int buf_size = 16 * 1024;
+    		char buffer[buf_size];
+    		int n = read(location_fd, buffer, buf_size);
+    		if (n < 0) {
+    			completed = true;
+    			perror("ERROR on read");
+    		}
+    		else if (n == 0) {
+    			completed = true;
+    			std::cout << "reached eof\n";
+    		}
+    		else if (n) {
+                std::cout << "read " << n << " bytes\n";
+                data.insert({"data", std::string(buffer, n)});
+    			event(return_channel, data);
+    		}
+        }
     }
-    //event("file", data);
 }
 
 
@@ -170,18 +199,37 @@ void filectl::recieve(core::channel &c, const core::object &obj) {
     if (!pathstr.empty()) {
         std::cout << "file request for " << pathstr << " recieved\n";
         paths.emplace_back(std::make_unique<path>(get_engine(), pathstr, obj["node"].as_string()));
-        path *p = paths.back().get();
-        p->channel_open("file", get_engine().node_get("templatectl"));
-        p->msg(c, obj);
+        paths.back()->channel_copy_all(this);
     }
 }
 
 
-void filectl::update() {}
+void filectl::update() {
+    paths.erase(
+        std::remove_if(
+            paths.begin(),
+            paths.end(),
+            [](std::unique_ptr<path> &p) {
+                return p->read_complete();
+            }),
+        paths.end()
+    );
+}
 
 
-core::object filectl::transform(const core::object &obj) const {
+core::object filectl::transform(const core::object &obj) const {}
 
+
+bool readyfd(int fd) {
+    struct pollfd fds {fd, POLLIN, POLLIN};
+    int result = poll(&fds, 1, 0);
+	if (result == -1) {
+		perror("ERROR on poll");
+	}
+    else if (result) {
+    	return true;
+	}
+	return false;
 }
 
 
@@ -206,14 +254,6 @@ core::object read_dir(const std::string &path) {
 	}
 
 	return filenames;
-}
-
-
-std::string read_file(const std::string &filename) {
-	std::ifstream t(filename);
-	std::stringstream ss;
-	ss << t.rdbuf();
-	return ss.str();
 }
 
 

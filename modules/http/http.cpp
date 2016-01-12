@@ -52,13 +52,17 @@ core::object httpctl::transform(const core::object &obj) const {
 
 
 core::object read_response(const core::object &obj) {
+    bool is_stream = (obj["metadata"]["ischr"].str() == "true");
     core::object::record data;
     data.insert(std::make_pair("type", "binary"));
-    std::string mime_type = "text/html";
+
     std::string content = obj["data"].as_string();
     std::string header = "HTTP/1.1 200 OK\n";
-	header += "Content-Type: " + mime_type + "\n";
-    header += "Content-Length: " + std::to_string(content.length()) + "\n";
+    if (!is_stream) {
+        std::string mime_type = "text/html";
+        header += "Content-Type: " + mime_type + "\n";
+        header += "Content-Length: " + std::to_string(content.length()) + "\n";
+    }
     header += "\n";
     data.insert(std::make_pair("data", header + content));
     return data;

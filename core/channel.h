@@ -18,7 +18,7 @@ class engine;
 class node {
 public:
     node(engine &e, const std::string &name);
-    ~node();
+    virtual ~node();
 
     engine &get_engine();
     std::string get_name() const;
@@ -26,8 +26,13 @@ public:
 
     channel *channel_open(const std::string &type, node *other);
     void channel_close(node *other);
-    void register_channel(channel *c);
+    void channel_copy_all(node *other);
 
+    /**
+     * register a channel this node will recieve from
+     */
+    void register_channel(channel *c);
+    void deregister_channel(channel *c);
 
 
     // ensure updates can only access the owned channels

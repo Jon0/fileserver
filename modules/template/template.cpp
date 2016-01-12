@@ -47,21 +47,26 @@ core::object templatectl::obj_template(const core::object &obj) {
         {"node", obj["node"]},
         {"type", "http"},
         {"data", result},
+        {"metadata", obj["metadata"]},
     };
     return data;
 }
 
 
 core::object templatectl::page_template(const core::object &obj) {
-    if (obj["filedata"].is_null()) {
+    if (obj["data"].is_null()) {
         return obj_template(obj);
     }
     else {
         core::object::record data = {
             {"node", obj["node"]},
             {"type", "http"},
-            {"data", obj["filedata"]},
+            {"data", obj["data"]},
+            {"metadata", obj["metadata"]},
         };
+
+        // Todo, replace variables
+
         return data;
     }
 }

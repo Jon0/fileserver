@@ -37,5 +37,4 @@ void socketctl::update() {}
 core::object socketctl::transform(const core::object &obj) const {}
 
 
-
 }

@@ -35,7 +35,7 @@ int node::channel_count() const {
 
 
 channel *node::channel_open(const std::string &type, node *other) {
-    std::cout << "[" << name << "] connecting to " << other->get_name() << "\n";
+    std::cout << "[" << name << "] connecting to " << other->get_name() << " (" << type << ")\n";
     channels.emplace_back(std::make_unique<channel>(type, *this));
     channel *opened_channel = channels.back().get();
     opened_channel->set_reciever(other);
@@ -44,6 +44,7 @@ channel *node::channel_open(const std::string &type, node *other) {
 
 
 void node::channel_close(node *other) {
+    std::cout << "[" << name << "] disconnect " << other->get_name() << "\n";
     channels.erase(
         std::remove_if(
             channels.begin(),
@@ -65,8 +66,29 @@ void node::channel_close(node *other) {
 }
 
 
+void node::channel_copy_all(node *other) {
+    std::cout << "[" << name << "] copying channels from " << other->get_name() << "\n";
+    for (channel *c : other->owned_channels()) {
+        channel_open(c->get_type(), c->get_reciever());
+    }
+}
+
+
 void node::register_channel(channel *c) {
     reply_channels.push_back(c);
+}
+
+
+void node::deregister_channel(channel *c) {
+    reply_channels.erase(
+        std::remove_if(
+            reply_channels.begin(),
+            reply_channels.end(),
+            [c](channel *other) {
+                return c == other;
+            }),
+        reply_channels.end()
+    );
 }
 
 
@@ -116,6 +138,9 @@ void node::event(const std::string &type, const object &obj) {
 
     if (!data_sent) {
         std::cout << "[" << name << "] " << type << " event was ignored\n";
+        for (auto &c : channels) {
+            std::cout << "[" << name << "] " << c->get_type() << "\n";
+        }
     }
 }
 
