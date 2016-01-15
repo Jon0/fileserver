@@ -4,9 +4,19 @@ namespace core {
 
 
 function::function() {
-
+    in_type = {
+        "binary",
+        {"0", "1"}
+    };
 }
 
+
+bool function::is_valid() {
+    // todo: check all input combinations
+    // reach an output
+
+    return false;
+}
 
 int function::compute() {
     current_state = &states.at(0);
