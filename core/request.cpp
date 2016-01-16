@@ -12,10 +12,16 @@ function::function() {
 
 
 bool function::is_valid() {
-    // todo: check all input combinations
-    // reach an output
-
-    return false;
+    // check all input combinations reach an output
+    int alphabet_size = in_type.symbols.size();
+    for (auto &s : states) {
+        for (int i = 0; i < alphabet_size; ++i) {
+            if (s.second.transitions.count(i) == 0) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 int function::compute() {
@@ -31,5 +37,11 @@ int function::compute() {
 request::request() {
 
 }
+
+
+void request::find_channels() {
+    // connect 1 input to 1 output
+}
+
 
 }

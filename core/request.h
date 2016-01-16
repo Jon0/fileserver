@@ -8,7 +8,7 @@
 namespace core {
 
 
-struct state_type {
+struct alphabet {
     std::string name;
     std::vector<std::string> symbols;
 };
@@ -20,6 +20,8 @@ struct state_type {
 struct state_map {
     int write;
     std::string name;
+
+    // symbol -> state
     std::unordered_map<int, int> transitions;
 };
 
@@ -38,7 +40,7 @@ public:
 
 
 private:
-    state_type in_type;
+    alphabet in_type;
 
     // there could be many inputs
     function *input;
@@ -52,6 +54,8 @@ private:
 class request {
 public:
     request();
+
+    void find_channels();
 
 
 private:

@@ -11,6 +11,14 @@ class channel;
 class engine;
 
 /**
+ * handler for reading and writing to external devices
+ */
+class endpoint {
+public:
+
+};
+
+/**
  * connection between engine and a module, or 2 modules
  * there might be two classes, channel server and client
  * this should be implemented by core::engine and each module
