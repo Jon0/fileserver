@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "channel.h"
+
 namespace core {
 
 
@@ -59,6 +61,8 @@ public:
 
 
 private:
+    endpoint *input;
+
     request *goal;
 
     std::string constraint;

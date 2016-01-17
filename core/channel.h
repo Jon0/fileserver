@@ -15,7 +15,7 @@ class engine;
  */
 class endpoint {
 public:
-
+    virtual size_t read_block(char *buffer, size_t size) = 0;
 };
 
 /**
