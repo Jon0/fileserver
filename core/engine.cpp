@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "engine.h"
+#include "parser.h"
 
 namespace core {
 
@@ -23,6 +24,11 @@ engine::~engine() {}
 
 
 void engine::start() {
+    read_file("test.m");
+}
+
+
+void engine::main_loop() {
     for (std::string &m : initial_modules) {
         open_module(m);
     }

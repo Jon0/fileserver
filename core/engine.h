@@ -20,6 +20,7 @@ public:
      * might be useful to have a main loop class
      */
     void start();
+    void main_loop();
 
     /**
      * make these nice for modules
