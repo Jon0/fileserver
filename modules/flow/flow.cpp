@@ -4,18 +4,14 @@
 
 std::unique_ptr<core::node> fctl;
 
-void flow_init(core::engine &e) {
-    fctl = std::make_unique<flow::flowctl>(e);
-}
+void flow_init(core::engine &e) {}
 
-void flow_uninit(core::engine &e) {
-    fctl = nullptr;
-}
+void flow_uninit(core::engine &e) {}
 
 namespace flow {
 
 
-flowctl::flowctl(core::engine &e)
+flowctl::flowctl(core::node_set &e)
     :
     core::node(e, "flowctl") {
     links = {
@@ -60,10 +56,10 @@ core::object flowctl::transform(const core::object &obj) const {
 void flowctl::name_match(const std::string &name, core::node *n) {
     for (auto &l : links) {
         if (std::get<0>(l) == name && connected.count(std::get<1>(l)) > 0) {
-            make_link(n, get_engine().node_get(std::get<1>(l)), std::get<2>(l));
+            make_link(n, get_set().node_get(std::get<1>(l)), std::get<2>(l));
         }
         else if (std::get<1>(l) == name && connected.count(std::get<0>(l)) > 0) {
-            make_link(get_engine().node_get(std::get<0>(l)), n, std::get<2>(l));
+            make_link(get_set().node_get(std::get<0>(l)), n, std::get<2>(l));
         }
     }
     connected.insert(name);

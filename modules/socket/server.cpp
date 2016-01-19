@@ -4,18 +4,14 @@
 
 std::unique_ptr<core::node> sctl;
 
-void socket_init(core::engine &e) {
-	sctl = std::make_unique<sock::socketctl>(e);
-}
+void socket_init(core::engine &e) {}
 
-void socket_uninit(core::engine &e) {
-	sctl = nullptr;
-}
+void socket_uninit(core::engine &e) {}
 
 namespace sock {
 
 
-socketctl::socketctl(core::engine &e)
+socketctl::socketctl(core::node_set &e)
 	:
 	core::node(e, "socketctl") {
 	acceptors.emplace_back(std::make_unique<tcp_acceptor>(e, 8080));

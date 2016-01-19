@@ -14,7 +14,7 @@ namespace route {
 
 class routectl : public core::node {
 public:
-    routectl(core::engine &e);
+    routectl(core::node_set &e);
 
     void handle_get(const core::object &obj);
 

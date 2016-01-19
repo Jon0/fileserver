@@ -7,54 +7,17 @@
 
 namespace core {
 
-engine::engine()
-    :
-    initial_modules({
-        "modules/file/libfile.so",
-        "modules/flow/libflow.so",
-        "modules/http/libhttp.so",
-        "modules/log/liblog.so",
-        "modules/route/libroute.so",
-        "modules/socket/libsocket.so",
-        "modules/template/libtemplate.so",
-    }) {}
+
+node_set::node_set() {}
 
 
-engine::~engine() {}
-
-
-void engine::start() {
-    read_file("test.m");
-}
-
-
-void engine::main_loop() {
-    for (std::string &m : initial_modules) {
-        open_module(m);
-    }
-
-    while (true) {
-        node_cleanup();
-
-        // read and respond etc...
-        for (node *n : nodes) {
-            if (to_remove.count(n) == 0) {
-                //std::cout << "[engine] updating " << n->get_name() << "\n";
-                n->update();
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-        }
-    }
-}
-
-
-void engine::node_open(node *n) {
+void node_set::node_open(node *n) {
     std::cout << "[engine] opening node " << n->get_name() << "\n";
     to_create.insert(n);
 }
 
 
-void engine::node_close(node *n) {
+void node_set::node_close(node *n) {
     std::cout << "[engine] closing node " << n->get_name() << "\n";
     to_remove.insert(n);
     for (node *nd : nodes) {
@@ -65,7 +28,7 @@ void engine::node_close(node *n) {
 }
 
 
-node *engine::node_get(const std::string &name) {
+node *node_set::node_get(const std::string &name) {
     for (node *n : nodes) {
         if (to_remove.count(n) == 0 && n->get_name() == name) {
             return n;
@@ -75,12 +38,21 @@ node *engine::node_get(const std::string &name) {
 }
 
 
-void engine::open_module(const std::string &module_path) {
-    modules.emplace_back(std::make_unique<module>(module_path));
-    modules.back()->init_module(*this);
+void node_set::update() {
+    node_cleanup();
+
+    // read and respond etc...
+    for (node *n : nodes) {
+        if (to_remove.count(n) == 0) {
+            //std::cout << "[engine] updating " << n->get_name() << "\n";
+            n->update();
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
 }
 
-void engine::node_cleanup() {
+
+void node_set::node_cleanup() {
 
     // this will always occur before the new
     // node is updated or recieves data
@@ -118,5 +90,45 @@ void engine::node_cleanup() {
     to_create.clear();
     to_remove.clear();
 }
+
+
+engine::engine()
+    :
+    initial_modules({
+        "modules/file/libfile.so",
+        "modules/flow/libflow.so",
+        "modules/http/libhttp.so",
+        "modules/log/liblog.so",
+        "modules/route/libroute.so",
+        "modules/socket/libsocket.so",
+        "modules/template/libtemplate.so",
+    }) {}
+
+
+engine::~engine() {}
+
+
+void engine::start() {
+    read_file("test.m");
+}
+
+
+void engine::main_loop() {
+    for (std::string &m : initial_modules) {
+        open_module(m);
+    }
+
+    while (true) {
+
+    }
+}
+
+
+void engine::open_module(const std::string &module_path) {
+    modules.emplace_back(std::make_unique<module>(module_path));
+    modules.back()->init_module(*this);
+}
+
+
 
 }

@@ -18,7 +18,7 @@ namespace sock {
 
 class socketctl : public core::node {
 public:
-    socketctl(core::engine &e);
+    socketctl(core::node_set &e);
 
     void create_notify(core::node *other) override;
     void remove_notify(core::node *other) override;

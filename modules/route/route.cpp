@@ -4,18 +4,14 @@
 
 std::unique_ptr<core::node> rctl;
 
-void route_init(core::engine &e) {
-    rctl = std::make_unique<route::routectl>(e);
-}
+void route_init(core::engine &e) {}
 
-void route_uninit(core::engine &e) {
-    rctl = nullptr;
-}
+void route_uninit(core::engine &e) {}
 
 namespace route {
 
 
-routectl::routectl(core::engine &e)
+routectl::routectl(core::node_set &e)
     :
     core::node(e, "routectl") {
 }
@@ -25,7 +21,7 @@ void routectl::handle_get(const core::object &obj) {
     std::string url = obj["url"].as_string();
     std::cout << "http request for " << url << " recieved\n";
     std::string ss = url.substr(1);
-    node *matched_node = get_engine().node_get(ss);
+    node *matched_node = get_set().node_get(ss);
 
     // get status of other nodes
     if (matched_node) {

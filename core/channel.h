@@ -8,7 +8,7 @@
 namespace core {
 
 class channel;
-class engine;
+class node_set;
 
 /**
  * handler for reading and writing to external devices
@@ -25,10 +25,10 @@ public:
  */
 class node {
 public:
-    node(engine &e, const std::string &name);
+    node(node_set &e, const std::string &name);
     virtual ~node();
 
-    engine &get_engine();
+    node_set &get_set();
     std::string get_name() const;
     int channel_count() const;
 
@@ -66,7 +66,7 @@ public:
     virtual object transform(const object &obj) const = 0;
 
 private:
-    engine &engi;
+    node_set &ns;
 
 
     const std::string name;

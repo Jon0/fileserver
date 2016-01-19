@@ -64,7 +64,7 @@ bool readyfd(int fd) {
 }
 
 
-tcp_acceptor::tcp_acceptor(core::engine &e, int port)
+tcp_acceptor::tcp_acceptor(core::node_set &e, int port)
 	:
 	core::node(e, "accept" + std::to_string(port)),
 	sockfd(listen_sockfd(port)),
@@ -106,7 +106,7 @@ void tcp_acceptor::update() {
 		int newfd = acceptfd(cli_addr);
 		if (newfd >= 0) {
 			std::string name = get_name() + "-" + std::to_string(next_sock_id++);
-			sockets.emplace_back(std::make_unique<tcp_socket>(get_engine(), newfd, name, cli_addr));
+			sockets.emplace_back(std::make_unique<tcp_socket>(get_set(), newfd, name, cli_addr));
 			sockets.back()->channel_copy_all(this);
 		}
 	}
@@ -128,7 +128,7 @@ core::object tcp_acceptor::transform(const core::object &obj) const {
 }
 
 
-tcp_socket::tcp_socket(core::engine &e, int fd, const std::string &name, const sockaddr_in &cli_addr)
+tcp_socket::tcp_socket(core::node_set &e, int fd, const std::string &name, const sockaddr_in &cli_addr)
 	:
 	core::node(e, name),
 	sockfd(fd),

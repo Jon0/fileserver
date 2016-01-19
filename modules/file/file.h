@@ -17,7 +17,7 @@ namespace file {
 
 class path : public core::node {
 public:
-	path(core::engine &e, const std::string &path, const std::string &ret);
+	path(core::node_set &e, const std::string &path, const std::string &ret);
 	~path();
 
 	bool exists() const;
@@ -57,7 +57,7 @@ private:
 
 class filectl : public core::node {
 public:
-    filectl(core::engine &e);
+    filectl(core::node_set &e);
 
     void create_notify(core::node *other) override;
     void remove_notify(core::node *other) override;

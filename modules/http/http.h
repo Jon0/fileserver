@@ -14,7 +14,7 @@ namespace http {
 
 class httpctl : public core::node {
 public:
-    httpctl(core::engine &e);
+    httpctl(core::node_set &e);
 
     void create_notify(core::node *other) override;
     void remove_notify(core::node *other) override;

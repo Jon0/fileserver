@@ -19,7 +19,7 @@ using flow_type = std::tuple<std::string, std::string, std::string>;
 
 class flowctl : public core::node {
 public:
-    flowctl(core::engine &e);
+    flowctl(core::node_set &e);
 
     void create_notify(core::node *other) override;
     void remove_notify(core::node *other) override;

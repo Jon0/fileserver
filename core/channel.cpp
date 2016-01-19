@@ -7,20 +7,20 @@
 namespace core {
 
 
-node::node(engine &e, const std::string &name)
+node::node(node_set &e, const std::string &name)
     :
-    engi(e),
+    ns(e),
     name(name) {
-    engi.node_open(this);
+    ns.node_open(this);
 }
 
 
 node::~node() {
-    engi.node_close(this);
+    ns.node_close(this);
 }
 
-engine &node::get_engine() {
-    return engi;
+node_set &node::get_set() {
+    return ns;
 }
 
 

@@ -12,18 +12,14 @@
 
 std::unique_ptr<core::node> fctl;
 
-void file_init(core::engine &e) {
-    fctl = std::make_unique<file::filectl>(e);
-}
+void file_init(core::engine &e) {}
 
-void file_uninit(core::engine &e) {
-    fctl = nullptr;
-}
+void file_uninit(core::engine &e) {}
 
 namespace file {
 
 
-path::path(core::engine &e, const std::string &path, const std::string &ret)
+path::path(core::node_set &e, const std::string &path, const std::string &ret)
 	:
     core::node(e, path),
 	filepath(path),
@@ -182,7 +178,7 @@ core::object path::transform(const core::object &obj) const {
 }
 
 
-filectl::filectl(core::engine &e)
+filectl::filectl(core::node_set &e)
     :
     core::node(e, "filectl") {
 }
@@ -198,7 +194,7 @@ void filectl::recieve(core::channel &c, const core::object &obj) {
     std::string pathstr = "." + obj["path"].as_string();
     if (!pathstr.empty()) {
         std::cout << "file request for " << pathstr << " recieved\n";
-        paths.emplace_back(std::make_unique<path>(get_engine(), pathstr, obj["node"].as_string()));
+        paths.emplace_back(std::make_unique<path>(get_set(), pathstr, obj["node"].as_string()));
         paths.back()->channel_copy_all(this);
     }
 }

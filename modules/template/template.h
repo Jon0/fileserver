@@ -14,7 +14,7 @@ namespace tmpl {
 
 class templatectl : public core::node {
 public:
-    templatectl(core::engine &e);
+    templatectl(core::node_set &e);
 
     core::object obj_template(const core::object &obj);
     core::object page_template(const core::object &obj);

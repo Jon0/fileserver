@@ -7,20 +7,16 @@
 std::unique_ptr<core::node> hctl;
 
 
-void http_init(core::engine &e) {
-    hctl = std::make_unique<http::httpctl>(e);
-}
+void http_init(core::engine &e) {}
 
 
-void http_uninit(core::engine &e) {
-    hctl = nullptr;
-}
+void http_uninit(core::engine &e) {}
 
 
 namespace http {
 
 
-httpctl::httpctl(core::engine &e)
+httpctl::httpctl(core::node_set &e)
     :
     core::node(e, "httpctl") {
 }

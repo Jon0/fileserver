@@ -4,18 +4,14 @@
 
 std::unique_ptr<core::node> tctl;
 
-void template_init(core::engine &e) {
-    tctl = std::make_unique<tmpl::templatectl>(e);
-}
+void template_init(core::engine &e) {}
 
-void template_uninit(core::engine &e) {
-    tctl = nullptr;
-}
+void template_uninit(core::engine &e) {}
 
 namespace tmpl {
 
 
-templatectl::templatectl(core::engine &e)
+templatectl::templatectl(core::node_set &e)
     :
     core::node(e, "templatectl") {
 }

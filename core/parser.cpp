@@ -16,7 +16,7 @@ std::vector<std::string> lex(const std::string &fname) {
     std::regex r("\\{|\\}|->|:|[_[:alnum:]]+");
     std::string in = ss.str();
     std::smatch match;
-    while (regex_search(in, match, r)) {
+    while (std::regex_search(in, match, r)) {
         for (int i = 0; i < match.size(); ++i) {
             result.push_back(match[i]);
         }

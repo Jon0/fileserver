@@ -16,7 +16,7 @@ bool readyfd(int fd);
 
 class tcp_acceptor : public core::node {
 public:
-	tcp_acceptor(core::engine &e, int port);
+	tcp_acceptor(core::node_set &e, int port);
 	~tcp_acceptor();
 
 	int acceptfd(sockaddr_in &cli_addr) const;
@@ -36,7 +36,7 @@ private:
 
 class tcp_socket : public core::node {
 public:
-	tcp_socket(core::engine &e, int fd, const std::string &name, const sockaddr_in &cli_addr);
+	tcp_socket(core::node_set &e, int fd, const std::string &name, const sockaddr_in &cli_addr);
 	~tcp_socket();
 
 	int fd() const;
