@@ -47,8 +47,14 @@ public:
     void start();
     void main_loop();
 
+    // return the set of nodes
+    node_set &nodes();
+
 private:
     void open_module(const std::string &module_path);
+
+    // all registered nodes
+    node_set nds;
 
     // modules to automatically open
     std::vector<std::string> initial_modules;

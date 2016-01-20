@@ -118,9 +118,7 @@ void engine::main_loop() {
         open_module(m);
     }
 
-    while (true) {
-
-    }
+    while (true) {}
 }
 
 
@@ -129,6 +127,10 @@ void engine::open_module(const std::string &module_path) {
     modules.back()->init_module(*this);
 }
 
+
+node_set &engine::nodes() {
+    return nds;
+}
 
 
 }

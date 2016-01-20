@@ -12,7 +12,9 @@
 
 std::unique_ptr<core::node> fctl;
 
-void file_init(core::engine &e) {}
+void file_init(core::engine &e) {
+	e.nodes();
+}
 
 void file_uninit(core::engine &e) {}
 
