@@ -26,6 +26,8 @@ class queue {
 public:
     queue();
 
+    bool empty() const;
+    queue_region *front();
     queue_region *insert();
 
 private:
@@ -33,6 +35,8 @@ private:
     using region_map_t = std::unordered_map<int, region_ptr_t>;
 
     region_map_t map;
+    int front_id;
+    int back_id;
 };
 
 

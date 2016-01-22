@@ -7,6 +7,7 @@
 
 #include "channel.h"
 #include "module.h"
+#include "queue.h"
 
 namespace core {
 
@@ -51,7 +52,11 @@ public:
     node_set &nodes();
 
 private:
+    void init_modules();
     void open_module(const std::string &module_path);
+
+    // queue state
+    queue main_queue;
 
     // all registered nodes
     node_set nds;

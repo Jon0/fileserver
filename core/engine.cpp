@@ -113,14 +113,18 @@ void engine::start() {
 }
 
 
-void engine::main_loop() {
+void engine::engine::main_loop() {
+    while(!main_queue.empty()) {
+
+    }
+}
+
+
+void engine::init_modules() {
     for (std::string &m : initial_modules) {
         open_module(m);
     }
-
-    while (true) {}
 }
-
 
 void engine::open_module(const std::string &module_path) {
     modules.emplace_back(std::make_unique<module>(module_path));

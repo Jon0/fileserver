@@ -5,12 +5,24 @@ namespace core {
 queue_region::queue_region() {}
 
 
-queue::queue() {}
+queue::queue()
+    :
+    front_id(0),
+    back_id(0) {}
 
+
+bool queue::empty() const {
+    return map.empty();
+}
+
+queue_region *queue::front() {
+    return map.at(front_id).get();
+}
 
 queue_region *queue::insert() {
-    map.insert(std::make_pair(0, std::make_unique<queue_region>()));
-    return map.at(0).get();
+    int addr = back_id++;
+    map.insert(std::make_pair(addr, std::make_unique<queue_region>()));
+    return map.at(addr).get();
 }
 
 }
