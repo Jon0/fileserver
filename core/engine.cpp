@@ -114,8 +114,10 @@ void engine::start() {
 
 
 void engine::engine::main_loop() {
-    while(!main_queue.empty()) {
+    main_queue.insert();
 
+    while(!main_queue.empty()) {
+        queue_region *r = main_queue.front();
     }
 }
 

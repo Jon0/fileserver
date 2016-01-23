@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 namespace core {
 
@@ -31,12 +32,26 @@ public:
     queue_region *insert();
 
 private:
-    using region_ptr_t = std::unique_ptr<queue_region>;
+    using region_ptr_t = std::shared_ptr<queue_region>;
     using region_map_t = std::unordered_map<int, region_ptr_t>;
 
     region_map_t map;
     int front_id;
     int back_id;
+};
+
+
+class queue_function {
+public:
+    queue_function();
+
+    void process(queue_region &q);
+
+private:
+
+    // function context
+    std::vector<int> context;
+
 };
 
 

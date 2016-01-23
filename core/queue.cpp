@@ -2,6 +2,7 @@
 
 namespace core {
 
+
 queue_region::queue_region() {}
 
 
@@ -15,14 +16,28 @@ bool queue::empty() const {
     return map.empty();
 }
 
+
 queue_region *queue::front() {
     return map.at(front_id).get();
 }
 
+
 queue_region *queue::insert() {
     int addr = back_id++;
-    map.insert(std::make_pair(addr, std::make_unique<queue_region>()));
+    map.insert(std::make_pair(addr, std::make_shared<queue_region>()));
     return map.at(addr).get();
 }
+
+
+queue_function::queue_function() {
+
+}
+
+
+void queue_function::process(queue_region &q) {
+    // read block header
+    
+}
+
 
 }
