@@ -109,15 +109,20 @@ engine::~engine() {}
 
 
 void engine::start() {
-    read_file("test.m");
+    pr = read_file("test.m");
+    main_loop();
 }
 
 
 void engine::engine::main_loop() {
-    main_queue.insert();
+    function *main = pr.get_main();
+    if (main) {
+        main_queue.insert();
 
-    while(!main_queue.empty()) {
-        queue_region *r = main_queue.front();
+        while(!main_queue.empty()) {
+            queue_region *r = main_queue.front();
+            main->eval(block());
+        }
     }
 }
 

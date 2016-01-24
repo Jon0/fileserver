@@ -7,6 +7,8 @@
 
 namespace core {
 
+struct block {};
+
 
 struct alphabet {
     std::string name;
@@ -18,8 +20,9 @@ struct alphabet {
  * function internal state
  */
 struct state_map {
-    int write;
     std::string name;
+    bool final_state;
+    block write;
 
     // symbol -> state
     std::unordered_map<int, int> transitions;
@@ -35,7 +38,7 @@ public:
 
     bool is_valid();
 
-    int compute();
+    block eval(block in);
 
 
 
@@ -49,6 +52,24 @@ private:
 
     std::unordered_map<int, state_map> states;
 };
+
+
+class program {
+public:
+    program();
+
+    function *get_main();
+
+    void add_alphabet(alphabet &&a);
+
+private:
+    std::unordered_map<std::string, alphabet> alphabets;
+    std::unordered_map<std::string, function> functions;
+
+    // queues
+    // {position -> data_type}
+};
+
 
 
 }

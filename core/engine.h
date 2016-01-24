@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "channel.h"
+#include "function.h"
 #include "module.h"
 #include "queue.h"
 
@@ -54,6 +55,9 @@ public:
 private:
     void init_modules();
     void open_module(const std::string &module_path);
+
+    // program
+    program pr;
 
     // queue state
     queue main_queue;
