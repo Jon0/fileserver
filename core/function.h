@@ -7,13 +7,28 @@
 
 namespace core {
 
-struct block {};
 
+class alphabet {
+public:
+    alphabet(const std::string &name, std::vector<std::string> s);
 
-struct alphabet {
-    std::string name;
-    std::vector<std::string> symbols;
+    int size() const;
+    int bits() const;
+    std::string get_symbol(int index) const;
+
+    const std::string name;
+    const std::vector<std::string> symbols;
 };
+
+
+class state_space {
+public:
+    state_space(std::vector<alphabet> &a);
+
+    const std::vector<alphabet> alphabets;
+};
+
+struct block {};
 
 
 /**
@@ -36,6 +51,8 @@ class function {
 public:
     function();
 
+    std::string name() const;
+
     bool is_valid();
 
     block eval(block in);
@@ -43,6 +60,7 @@ public:
 
 
 private:
+    std::string fn_name;
     alphabet in_type;
 
     // there could be many inputs
@@ -61,6 +79,7 @@ public:
     function *get_main();
 
     void add_alphabet(alphabet &&a);
+    void add_function(function &&f);
 
 private:
     std::unordered_map<std::string, alphabet> alphabets;

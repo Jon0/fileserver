@@ -124,6 +124,9 @@ void engine::engine::main_loop() {
             main->eval(block());
         }
     }
+    else {
+        std::cout << "no main function\n";
+    }
 }
 
 

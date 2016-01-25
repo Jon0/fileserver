@@ -3,11 +3,42 @@
 namespace core {
 
 
-function::function() {
-    in_type = {
-        "binary",
-        {"0", "1"}
-    };
+alphabet::alphabet(const std::string &name, std::vector<std::string> s)
+    :
+    name(name),
+    symbols(s) {}
+
+
+int alphabet::size() const {
+    return symbols.size();
+}
+
+
+int alphabet::bits() const {
+    return size();
+}
+
+
+std::string alphabet::get_symbol(int index) const {
+    return symbols.at(index % symbols.size());
+}
+
+
+state_space::state_space(std::vector<alphabet> &a)
+    :
+    alphabets(a) {
+}
+
+
+function::function()
+    :
+    fn_name("main"),
+    in_type("binary", {"0", "1"}) {
+}
+
+
+std::string function::name() const {
+    return fn_name;
 }
 
 
@@ -51,5 +82,9 @@ void program::add_alphabet(alphabet &&a) {
     alphabets.insert(std::make_pair(a.name, a));
 }
 
+
+void program::add_function(function &&f) {
+    functions.insert(std::make_pair(f.name(), f));
+}
 
 }

@@ -30,7 +30,7 @@ alphabet read_enum(tokens &source) {
             symbols
         };
     }
-    return alphabet();
+    return alphabet("empty", {});
 }
 
 
@@ -51,7 +51,7 @@ program read_file(const std::string &fname) {
             p.add_alphabet(read_enum(source));
         }
         else if (source.front() == "func") {
-            read_func(source);
+            p.add_function(read_func(source));
         }
         else {
             source.pop();
