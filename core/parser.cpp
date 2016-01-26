@@ -16,26 +16,46 @@ bool match(tokens &source, const std::string &t) {
     return false;
 }
 
-alphabet read_enum(tokens &source) {
+
+alias read_alias(tokens &source) {
+    std::vector<std::string> symbols;
     if (match(source, "enum")) {
-        std::vector<std::string> symbols;
         std::string name = source.front();
         source.pop();
+        if (match(source, "{")) {
+            while (!match(source, "}")) {
+                symbols.push_back(source.front());
+                source.pop();
+            }
+        }
+        return alias{name, symbols};
+    }
+    return alias{"", symbols};
+}
+
+
+void read_mapping(tokens &source) {
+    std::string name = source.front();
+    source.pop();
+    match(source, ":");
+    if (match(source, "{")) {
         while (!match(source, "}")) {
-            symbols.push_back(source.front());
+            std::cout << "got " << source.front() << "\n";
             source.pop();
         }
-        return alphabet {
-            name,
-            symbols
-        };
     }
-    return alphabet("empty", {});
 }
 
 
 function read_func(tokens &source) {
     if (match(source, "func")) {
+        std::string name = source.front();
+        source.pop();
+        if (match(source, "{")) {
+            while (!match(source, "}")) {
+                read_mapping(source);
+            }
+        }
         return function();
     }
     return function();
@@ -48,7 +68,7 @@ program read_file(const std::string &fname) {
 
     while (!source.empty()) {
         if (source.front() == "enum") {
-            p.add_alphabet(read_enum(source));
+            p.add_alias(read_alias(source));
         }
         else if (source.front() == "func") {
             p.add_function(read_func(source));

@@ -12,7 +12,9 @@ using tokens = std::queue<std::string>;
 
 bool match(tokens &source, const std::string &t);
 
-alphabet read_enum(tokens &source);
+alias read_alias(tokens &source);
+
+void read_mapping(tokens &source);
 
 function read_func(tokens &source);
 
