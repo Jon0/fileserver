@@ -31,19 +31,15 @@ struct state_map {
  */
 class function {
 public:
-    function();
 
-    std::string name() const;
+    function(state_space::ptr_t type);
 
     bool is_valid();
 
     block eval(block in);
 
-
-
 private:
-    std::string fn_name;
-    state_enum in_type;
+    state_space::ptr_t type;
 
     // there could be many inputs
     function *input;
@@ -54,23 +50,15 @@ private:
 };
 
 
-struct alias {
-    const std::string name;
-    const state_enum type;
-};
-
-
 class program {
 public:
     program();
 
     function *get_main();
 
-    void add_alias(alias &&a);
-    void add_function(function &&f);
+    void add_function(const std::string &name, function &&f);
 
 private:
-    std::unordered_map<std::string, state_enum> alphabets;
     std::unordered_map<std::string, function> functions;
 
     // queues

@@ -46,7 +46,6 @@ void node_set::update() {
         if (to_remove.count(n) == 0) {
             //std::cout << "[engine] updating " << n->get_name() << "\n";
             n->update();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 }
@@ -117,11 +116,13 @@ void engine::start() {
 void engine::engine::main_loop() {
     function *main = pr.get_main();
     if (main) {
+        std::cout << "main found\n";
         main_queue.insert();
 
         while(!main_queue.empty()) {
             queue_region *r = main_queue.front();
             main->eval(block());
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
     else {

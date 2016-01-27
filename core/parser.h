@@ -12,11 +12,13 @@ using tokens = std::queue<std::string>;
 
 bool match(tokens &source, const std::string &t);
 
-alias read_alias(tokens &source);
 
-void read_mapping(tokens &source);
 
-function read_func(tokens &source);
+state_space::ptr_t read_type(type_context &ct, tokens &source);
+void read_alias(type_context &ct, tokens &source);
+void read_mapping(type_context &ct, tokens &source);
+void read_value(type_context &ct, tokens &source);
+void read_func(program &p, type_context &ct, tokens &source);
 
 program read_file(const std::string &fname);
 
