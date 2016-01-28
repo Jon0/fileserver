@@ -24,7 +24,7 @@ state_space::ptr_t read_type(type_context &ct, tokens &source) {
         source.pop();
         if (match(source, "*")) {
             state_space::ptr_t rhs = read_type(ct, source);
-            std::vector<state_space::ptr_t> elements;
+            std::vector<state_space::ptr_t> elements({lhs, rhs});
             return std::make_shared<state_multiply>(elements);
         }
         else if (match(source, "->")) {

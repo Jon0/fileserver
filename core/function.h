@@ -10,8 +10,23 @@
 namespace core {
 
 
-struct block {};
+struct block {
+    int size;
+    char *state;
+};
 
+
+class symbol {
+public:
+    symbol(state_space::ptr_t value_type);
+
+    const state_space::ptr_t type() const;
+    virtual block state() const = 0;
+
+private:
+    const state_space::ptr_t value_type;
+
+};
 
 /**
  * function internal state
@@ -29,24 +44,19 @@ struct state_map {
 /**
  * functions used for transforming input streams
  */
-class function {
+class function : public symbol {
 public:
+    function(state_space::ptr_t function_type);
 
-    function(state_space::ptr_t type);
+    block state() const override;
 
     bool is_valid();
 
     block eval(block in);
 
 private:
-    state_space::ptr_t type;
-
-    // there could be many inputs
-    function *input;
-
-    state_map *current_state;
-
     std::unordered_map<int, state_map> states;
+
 };
 
 

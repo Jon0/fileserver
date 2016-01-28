@@ -41,16 +41,17 @@ private:
 };
 
 
-class queue_function {
+class stream {
 public:
-    queue_function();
+    stream();
 
     void process(queue_region &q);
 
 private:
 
-    // function context
-    std::vector<int> context;
+    queue in;
+    queue out;
+    char state[32];
 
 };
 

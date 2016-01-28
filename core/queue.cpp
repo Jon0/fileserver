@@ -29,15 +29,4 @@ queue_region *queue::insert() {
 }
 
 
-queue_function::queue_function() {
-
-}
-
-
-void queue_function::process(queue_region &q) {
-    // read block header
-    
-}
-
-
 }
