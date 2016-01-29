@@ -1,9 +1,16 @@
+#include <cmath>
+
 #include "type.h"
 
 namespace core {
 
 
 const state_space::ptr_t state_space::empty_set = std::make_shared<state_enum>(std::vector<std::string>());
+
+
+int state_space::bytes() const {
+    return std::ceil(bits() / 8.0);
+}
 
 
 state_enum::state_enum(std::vector<std::string> s)
@@ -52,7 +59,11 @@ int state_multiply::size() const {
 
 
 int state_multiply::bits() const {
-    return size();
+    int total = 0;
+    for (const state_space::ptr_t &s : subspaces) {
+        total += s->bits();
+    }
+    return total;
 }
 
 
@@ -78,7 +89,7 @@ int state_function::size() const {
 
 
 int state_function::bits() const {
-    return size();
+    return lspace->size() * rspace->bits();
 }
 
 

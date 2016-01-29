@@ -10,52 +10,46 @@
 namespace core {
 
 
-struct block {
-    int size;
-    char *state;
-};
-
-
+/**
+ * functions used for transforming input streams
+ */
 class symbol {
 public:
-    symbol(state_space::ptr_t value_type);
+    using ptr_t = std::shared_ptr<symbol>;
 
+    symbol(state_space::ptr_t value_type);
     const state_space::ptr_t type() const;
-    virtual block state() const = 0;
+    virtual const char *state() const = 0;
+    virtual const symbol::ptr_t eval(const symbol *in) const = 0;
 
 private:
     const state_space::ptr_t value_type;
 
 };
 
-/**
- * function internal state
- */
-struct state_map {
-    std::string name;
-    bool final_state;
-    block write;
 
-    // symbol -> state
-    std::unordered_map<int, int> transitions;
+class memory : public symbol {
+public:
+    memory(state_space::ptr_t value_type, int element);
+
+    const char *state() const override;
+    const symbol::ptr_t eval(const symbol *in) const override;
+
+private:
+    std::unique_ptr<char[]> block;
+
 };
 
 
-/**
- * functions used for transforming input streams
- */
-class function : public symbol {
+class submemory : public symbol {
 public:
-    function(state_space::ptr_t function_type);
+    submemory(state_space::ptr_t value_type, const char *mem);
 
-    block state() const override;
-
-    bool is_valid();
-
-    block eval(block in);
+    const char *state() const override;
+    const symbol::ptr_t eval(const symbol *in) const override;
 
 private:
-    std::unordered_map<int, state_map> states;
+    const char *block;
 
 };
 
@@ -64,17 +58,16 @@ class program {
 public:
     program();
 
-    function *get_main();
+    symbol *get_main();
 
-    void add_function(const std::string &name, function &&f);
+    void add_symbol(const std::string &name, symbol::ptr_t s);
 
 private:
-    std::unordered_map<std::string, function> functions;
+    std::unordered_map<std::string, symbol::ptr_t> symbols;
 
     // queues
     // {position -> data_type}
 };
-
 
 
 }

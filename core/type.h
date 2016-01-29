@@ -11,6 +11,7 @@ namespace core {
 class state_space {
 public:
     using ptr_t = std::shared_ptr<state_space>;
+    int bytes() const;
     virtual int size() const = 0;
     virtual int bits() const = 0;
     virtual const ptr_t lhs() const = 0;

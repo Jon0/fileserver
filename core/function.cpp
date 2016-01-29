@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "function.h"
 
 namespace core {
@@ -13,56 +15,63 @@ const state_space::ptr_t symbol::type() const {
 }
 
 
-function::function(state_space::ptr_t function_type)
+memory::memory(state_space::ptr_t value_type, int element)
     :
-    symbol(function_type) {
+    symbol(value_type) {
+    block = std::make_unique<char[]>(value_type->bytes());
+    int index = element % value_type->size();
+    std::memcpy(block.get(), &index, value_type->bytes());
 }
 
 
-block function::state() const {
-
+const char *memory::state() const {
+    return block.get();
 }
 
 
-bool function::is_valid() {
-    // check all input combinations reach an output
-    int alphabet_size = type()->size();
-    for (auto &s : states) {
-        for (int i = 0; i < alphabet_size; ++i) {
-            if (s.second.transitions.count(i) == 0) {
-                return false;
-            }
-        }
-    }
-    return true;
+const symbol::ptr_t memory::eval(const symbol *in) const {
+    int index = 0;
+    std::memcpy(&index, in->state(), in->type()->bytes());
+    index *= type()->rhs()->bytes();
+    return std::make_shared<submemory>(type()->rhs(), &block[index]);
 }
 
 
-block function::eval(block in) {
-    state_map *current_state = &states.at(0);
-    while (!current_state->final_state) {
-        int read = 0; //input->eval(in);
-        current_state = &states.at(read);
-    }
-    return current_state->write;
+submemory::submemory(state_space::ptr_t value_type, const char *mem)
+    :
+    symbol(value_type),
+    block(mem) {
+}
+
+
+const char *submemory::state() const {
+    return block;
+}
+
+
+const symbol::ptr_t submemory::eval(const symbol *in) const {
+    int index = 0;
+    std::memcpy(&index, in->state(), in->type()->bytes());
+    index *= type()->rhs()->bytes();
+    return std::make_shared<submemory>(type()->rhs(), &block[index]);
 }
 
 
 program::program() {}
 
 
-function *program::get_main() {
-    if (functions.count("main") == 0) {
+symbol *program::get_main() {
+    if (symbols.count("main") == 0) {
         return nullptr;
     }
     else {
-        return &functions.at("main");
+        return symbols.at("main").get();
     }
 }
 
 
-void program::add_function(const std::string &name, function &&f) {
-    functions.insert(std::make_pair(name, f));
+void program::add_symbol(const std::string &name, symbol::ptr_t s) {
+    symbols.insert(std::make_pair(name, s));
 }
 
 }

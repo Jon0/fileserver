@@ -114,14 +114,24 @@ void engine::start() {
 
 
 void engine::engine::main_loop() {
-    function *main = pr.get_main();
+    symbol *main = pr.get_main();
     if (main) {
         std::cout << "main found\n";
-        main_queue.insert();
 
+        std::cout << main->type()->bytes() << "\n";
+        std::cout << main->type()->size() << "\n";
+
+        memory test_input_1(main->type()->lhs(), 0);
+        memory test_input_2(main->type()->lhs(), 1);
+
+        main_queue.insert();
         while(!main_queue.empty()) {
             queue_region *r = main_queue.front();
-            main->eval(block());
+            auto out = main->eval(&test_input_1);
+            std::cout << out->type()->bytes() << "\n";
+            std::cout << out->type()->size() << "\n";
+            std::cout << static_cast<int>(*out->state()) << "\n";
+
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }

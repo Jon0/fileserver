@@ -71,10 +71,16 @@ void read_mapping(type_context &ct, tokens &source) {
 }
 
 
-void read_value(type_context &ct, tokens &source) {
+symbol::ptr_t read_value(type_context &ct, tokens &source) {
     state_space::ptr_t type = read_type(ct, source);
     match(source, ":");
-    if (match(source, "(")) {
+    if (match(source, "{")) {
+        while (!match(source, "}")) {
+            std::cout << "func value " << source.front() << "\n";
+            source.pop();
+        }
+    }
+    else if (match(source, "(")) {
         while (!match(source, ")")) {
             std::cout << "list value " << source.front() << "\n";
             source.pop();
@@ -84,6 +90,7 @@ void read_value(type_context &ct, tokens &source) {
         std::cout << "value " << source.front() << "\n";
         source.pop();
     }
+    return std::make_shared<memory>(type, rand());
 }
 
 
@@ -91,9 +98,8 @@ void read_func(program &p, type_context &ct, tokens &source) {
     if (match(source, "elem")) {
         std::string name = source.front();
         source.pop();
-        std::cout << "element " << name << "\n";
-        read_value(ct, source);
-        //p.add_function(name, function(type));
+        std::cout << "add symbol " << name << "\n";
+        p.add_symbol(name, read_value(ct, source));
     }
 }
 
