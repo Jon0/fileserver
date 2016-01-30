@@ -120,17 +120,17 @@ void engine::engine::main_loop() {
 
         std::cout << main->type()->bytes() << "\n";
         std::cout << main->type()->size() << "\n";
+        symbol::ptr_t current_state = std::make_shared<memory>(main->type()->lhs(), 0);
 
-        memory test_input_1(main->type()->lhs(), 0);
-        memory test_input_2(main->type()->lhs(), 1);
 
         main_queue.insert();
         while(!main_queue.empty()) {
             queue_region *r = main_queue.front();
-            auto out = main->eval(&test_input_1);
+            auto out = main->eval(current_state.get());
             std::cout << out->type()->bytes() << "\n";
             std::cout << out->type()->size() << "\n";
             std::cout << static_cast<int>(*out->state()) << "\n";
+            current_state = out;
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
