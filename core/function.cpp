@@ -32,6 +32,7 @@ const char *memory::state() const {
 const symbol::ptr_t memory::eval(const symbol *in) const {
     int index = 0;
     std::memcpy(&index, in->state(), in->type()->bytes());
+    index %= type()->lhs()->size();
     index *= type()->rhs()->bytes();
     return std::make_shared<submemory>(type()->rhs(), &block[index]);
 }
@@ -52,6 +53,7 @@ const char *submemory::state() const {
 const symbol::ptr_t submemory::eval(const symbol *in) const {
     int index = 0;
     std::memcpy(&index, in->state(), in->type()->bytes());
+    index %= type()->lhs()->size();
     index *= type()->rhs()->bytes();
     return std::make_shared<submemory>(type()->rhs(), &block[index]);
 }
