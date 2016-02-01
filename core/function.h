@@ -30,7 +30,16 @@ private:
 
 class memory : public symbol {
 public:
+
+    /**
+     * initialise a new block of memory
+     */
     memory(state_space::ptr_t value_type, int element);
+
+    /**
+     * combine two types into one
+     */
+    memory(symbol *a, symbol *b);
 
     const char *state() const override;
     const symbol::ptr_t eval(const symbol *in) const override;
@@ -67,7 +76,11 @@ private:
 
     // queues
     // {position -> data_type}
+
 };
+
+
+state_space::ptr_t type_mix(symbol *a, symbol *b);
 
 
 }

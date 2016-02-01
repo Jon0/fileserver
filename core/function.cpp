@@ -18,9 +18,19 @@ const state_space::ptr_t symbol::type() const {
 memory::memory(state_space::ptr_t value_type, int element)
     :
     symbol(value_type) {
-    block = std::make_unique<char[]>(value_type->bytes());
+    int size = type()->bytes();
+    block = std::make_unique<char[]>(size);
     int index = element % value_type->size();
-    std::memcpy(block.get(), &index, value_type->bytes());
+    std::memcpy(block.get(), &index, size);
+}
+
+
+memory::memory(symbol *a, symbol *b)
+    :
+    symbol(type_mix(a, b)) {
+    block = std::make_unique<char[]>(type()->bytes());
+    std::memcpy(&block[0], a->state(), a->type()->bytes());
+    std::memcpy(&block[a->type()->bytes()], b->state(), b->type()->bytes());
 }
 
 
@@ -75,5 +85,12 @@ symbol *program::get_main() {
 void program::add_symbol(const std::string &name, symbol::ptr_t s) {
     symbols.insert(std::make_pair(name, s));
 }
+
+
+state_space::ptr_t type_mix(symbol *a, symbol *b) {
+    std::vector<state_space::ptr_t> types({a->type(), b->type()});
+    return std::make_shared<state_multiply>(types);
+}
+
 
 }

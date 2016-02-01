@@ -127,7 +127,6 @@ void engine::engine::main_loop() {
         while(!main_queue.empty()) {
             queue_region *r = main_queue.front();
             auto out = main->eval(current_state.get());
-            std::cout << out->type()->bytes() << "\n";
             std::cout << out->type()->size() << "\n";
             std::cout << static_cast<int>(*out->state()) << "\n";
             current_state = out;
