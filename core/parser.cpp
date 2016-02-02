@@ -19,21 +19,11 @@ bool match(tokens &source, const std::string &t) {
 
 state_space::ptr_t read_type(type_context &ct, tokens &source) {
     std::string next = source.front();
-    if (ct.contains(next)) {
-        state_space::ptr_t lhs = ct.get_type(next);
-        source.pop();
-        if (match(source, "*")) {
-            state_space::ptr_t rhs = read_type(ct, source);
-            std::vector<state_space::ptr_t> elements({lhs, rhs});
-            return std::make_shared<state_multiply>(elements);
-        }
-        else if (match(source, "->")) {
-            state_space::ptr_t rhs = read_type(ct, source);
-            return std::make_shared<state_function>(lhs, rhs);
-        }
-        else {
-            return lhs;
-        }
+    state_space::ptr_t current = nullptr;
+
+    if (match(source, "(")) {
+        current = read_type(ct, source);
+        match(source, ")");
     }
     else if (match(source, "{")) {
         std::vector<std::string> symbols;
@@ -41,10 +31,29 @@ state_space::ptr_t read_type(type_context &ct, tokens &source) {
             symbols.push_back(source.front());
             source.pop();
         }
-        return std::make_shared<state_enum>(symbols);
+        current = std::make_shared<state_enum>(symbols);
     }
-    std::cout << "read type failed\n";
-    return nullptr;
+    else if (ct.contains(next)) {
+        current = ct.get_type(next);
+        source.pop();
+    }
+    else {
+        current = state_space::empty_set;
+    }
+
+    // parse operators
+    while (match(source, "*")) {
+        state_space::ptr_t rhs = read_type(ct, source);
+        std::vector<state_space::ptr_t> elements({current, rhs});
+        current = std::make_shared<state_multiply>(elements);
+    }
+
+    while (match(source, "->")) {
+        state_space::ptr_t rhs = read_type(ct, source);
+        current = std::make_shared<state_function>(current, rhs);
+    }
+
+    return current;
 }
 
 
@@ -71,26 +80,52 @@ void read_mapping(type_context &ct, tokens &source) {
 }
 
 
-symbol::ptr_t read_value(type_context &ct, tokens &source) {
-    state_space::ptr_t type = read_type(ct, source);
-    match(source, ":");
+symbol::ptr_t read_value(state_space::ptr_t type, type_context &ct, tokens &source) {
+    auto type_size = static_cast<long unsigned int>(type->bytes());
+    std::unique_ptr<char[]> b = std::make_unique<char[]>(type_size);
+
     if (match(source, "{")) {
+
+        // read function mappings
         while (!match(source, "}")) {
-            std::cout << "func value " << source.front() << "\n";
-            source.pop();
+            auto l_size = static_cast<long unsigned int>(type->lhs()->bytes());
+            auto r_size = static_cast<long unsigned int>(type->rhs()->bytes());
+            symbol::ptr_t lhs = read_value(type->lhs(), ct, source);
+            if (match(source, "->")) {
+                state_size index;
+                int size = std::min(sizeof(index), l_size);
+                std::cout << "size is " << size << "\n";
+                std::memcpy(&index, lhs->state(), size);
+                index %= type->lhs()->size();
+                std::cout << "index is " << index << "\n";
+
+                symbol::ptr_t rhs = read_value(type->rhs(), ct, source);
+                std::memcpy(&b[index * r_size], rhs->state(), r_size);
+            }
+            else {
+                std::cout << "error reading function\n";
+            }
         }
     }
     else if (match(source, "(")) {
+
+        // read block states
         while (!match(source, ")")) {
             std::cout << "list value " << source.front() << "\n";
             source.pop();
+            match(source, ",");
         }
     }
     else {
+
+        // read single values
         std::cout << "value " << source.front() << "\n";
+        state_size s = type->state(source.front());
+        int size = std::min(sizeof(s), type_size);
+        std::memcpy(b.get(), &s, size);
         source.pop();
     }
-    return std::make_shared<memory>(type, rand());
+    return std::make_shared<memory>(type, b.get());
 }
 
 
@@ -98,8 +133,12 @@ void read_func(program &p, type_context &ct, tokens &source) {
     if (match(source, "elem")) {
         std::string name = source.front();
         source.pop();
-        std::cout << "add symbol " << name << "\n";
-        p.add_symbol(name, read_value(ct, source));
+        state_space::ptr_t type = read_type(ct, source);
+        if (match(source, ":")) {
+            std::cout << "add symbol " << name << " : " << type->desc() << "\n";
+            p.add_symbol(name, read_value(type, ct, source));
+        }
+
     }
 }
 

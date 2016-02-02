@@ -15,13 +15,12 @@ const state_space::ptr_t symbol::type() const {
 }
 
 
-memory::memory(state_space::ptr_t value_type, int element)
+memory::memory(state_space::ptr_t value_type, const char *b)
     :
     symbol(value_type) {
     int size = type()->bytes();
     block = std::make_unique<char[]>(size);
-    int index = element % value_type->size();
-    std::memcpy(block.get(), &index, size);
+    std::memcpy(block.get(), b, size);
 }
 
 

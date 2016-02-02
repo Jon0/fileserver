@@ -118,9 +118,11 @@ void engine::engine::main_loop() {
     if (main) {
         std::cout << "main found\n";
 
-        std::cout << main->type()->bytes() << "\n";
-        std::cout << main->type()->size() << "\n";
-        symbol::ptr_t current_state = std::make_shared<memory>(main->type()->lhs(), 0);
+        state_space::ptr_t type = main->type();
+        std::cout << type->bytes() << "\n";
+        std::cout << type->size() << "\n";
+        std::unique_ptr<char[]> b = std::make_unique<char[]>(type->lhs()->bytes());
+        symbol::ptr_t current_state = std::make_shared<memory>(type->lhs(), b.get());
 
 
         main_queue.insert();

@@ -7,16 +7,19 @@
 
 namespace core {
 
+using state_size = int;
 
 class state_space {
 public:
     using ptr_t = std::shared_ptr<state_space>;
     int bytes() const;
-    virtual int size() const = 0;
+    std::string desc() const;
+    virtual state_size size() const = 0;
     virtual int bits() const = 0;
     virtual const ptr_t lhs() const = 0;
     virtual const ptr_t rhs() const = 0;
-
+    virtual state_size state(const std::string &s) const = 0;
+    virtual std::string symbol(state_size s) const = 0;
     static const ptr_t empty_set;
 };
 
@@ -27,12 +30,12 @@ class state_enum : public state_space  {
 public:
     state_enum(std::vector<std::string> s);
 
-    int size() const override;
+    state_size size() const override;
     int bits() const override;
     const state_space::ptr_t lhs() const override;
     const state_space::ptr_t rhs() const override;
-
-    std::string get_symbol(int index) const;
+    state_size state(const std::string &s) const override;
+    std::string symbol(state_size s) const override;
 
 private:
     const std::vector<std::string> symbols;
@@ -42,12 +45,14 @@ private:
 
 class state_multiply : public state_space {
 public:
-    state_multiply(std::vector<state_space::ptr_t> &sp);
+    state_multiply(const std::vector<state_space::ptr_t> &sp);
 
-    int size() const override;
+    state_size size() const override;
     int bits() const override;
     const state_space::ptr_t lhs() const override;
     const state_space::ptr_t rhs() const override;
+    state_size state(const std::string &s) const override;
+    std::string symbol(state_size s) const override;
 
 private:
     const std::vector<state_space::ptr_t> subspaces;
@@ -59,10 +64,12 @@ class state_function : public state_space {
 public:
     state_function(state_space::ptr_t l, state_space::ptr_t r);
 
-    int size() const override;
+    state_size size() const override;
     int bits() const override;
     const state_space::ptr_t lhs() const override;
     const state_space::ptr_t rhs() const override;
+    state_size state(const std::string &s) const override;
+    std::string symbol(state_size s) const override;
 
 private:
     const state_space::ptr_t lspace;

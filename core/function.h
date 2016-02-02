@@ -34,7 +34,7 @@ public:
     /**
      * initialise a new block of memory
      */
-    memory(state_space::ptr_t value_type, int element);
+    memory(state_space::ptr_t value_type, const char *b);
 
     /**
      * combine two types into one
