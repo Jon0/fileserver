@@ -15,6 +15,16 @@ const state_space::ptr_t symbol::type() const {
 }
 
 
+state_size symbol::index() const {
+    auto t_size = static_cast<long unsigned int>(value_type->bytes());
+    int copy_size = std::min(sizeof(state_size), t_size);
+    state_size i = 0;
+    std::memcpy(&i, state(), copy_size);
+    i %= value_type->size();
+    return i;
+}
+
+
 memory::memory(state_space::ptr_t value_type, const char *b)
     :
     symbol(value_type) {

@@ -94,11 +94,8 @@ symbol::ptr_t read_value(state_space::ptr_t type, type_context &ct, tokens &sour
             if (match(source, "->")) {
                 state_size index;
                 int size = std::min(sizeof(index), l_size);
-                std::cout << "size is " << size << "\n";
                 std::memcpy(&index, lhs->state(), size);
                 index %= type->lhs()->size();
-                std::cout << "index is " << index << "\n";
-
                 symbol::ptr_t rhs = read_value(type->rhs(), ct, source);
                 std::memcpy(&b[index * r_size], rhs->state(), r_size);
             }
@@ -108,21 +105,31 @@ symbol::ptr_t read_value(state_space::ptr_t type, type_context &ct, tokens &sour
         }
     }
     else if (match(source, "(")) {
+        std::vector<state_space::ptr_t> types = type->subtypes();
+        state_size offset = 1;
+        state_size state = 0;
 
         // read block states
-        while (!match(source, ")")) {
-            std::cout << "list value " << source.front() << "\n";
-            source.pop();
+        for (state_space::ptr_t &t : types) {
+            symbol::ptr_t val = read_value(t, ct, source);
+            state += offset * val->index();
+            offset += t->bits();
             match(source, ",");
+        }
+        if (match(source, ")")) {
+            int size = std::min(sizeof(state), type_size);
+            std::memcpy(b.get(), &state, size);
+        }
+        else {
+            std::cout << "error reading subtypes\n";
         }
     }
     else {
 
         // read single values
-        std::cout << "value " << source.front() << "\n";
-        state_size s = type->state(source.front());
-        int size = std::min(sizeof(s), type_size);
-        std::memcpy(b.get(), &s, size);
+        state_size state = type->state(source.front());
+        int size = std::min(sizeof(state), type_size);
+        std::memcpy(b.get(), &state, size);
         source.pop();
     }
     return std::make_shared<memory>(type, b.get());

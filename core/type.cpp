@@ -52,6 +52,11 @@ const state_space::ptr_t state_enum::rhs() const {
 }
 
 
+std::vector<state_space::ptr_t> state_enum::subtypes() const {
+    return std::vector<state_space::ptr_t>({rhs()});
+}
+
+
 state_size state_enum::state(const std::string &s) const {
     for (state_size i = 0; i < symbols.size(); ++i) {
         if (symbols.at(i) == s) {
@@ -104,6 +109,11 @@ const state_space::ptr_t state_multiply::rhs() const {
 }
 
 
+std::vector<state_space::ptr_t> state_multiply::subtypes() const {
+    return subspaces;
+}
+
+
 state_size state_multiply::state(const std::string &s) const {
     return 0;
 }
@@ -137,6 +147,12 @@ const state_space::ptr_t state_function::lhs() const {
 
 const state_space::ptr_t state_function::rhs() const {
     return rspace;
+}
+
+
+std::vector<state_space::ptr_t> state_function::subtypes() const {
+    state_space::ptr_t ptr = std::make_shared<state_function>(lspace, rspace);
+    return std::vector<state_space::ptr_t>({ptr});
 }
 
 

@@ -19,6 +19,7 @@ public:
 
     symbol(state_space::ptr_t value_type);
     const state_space::ptr_t type() const;
+    state_size index() const;
     virtual const char *state() const = 0;
     virtual const symbol::ptr_t eval(const symbol *in) const = 0;
 

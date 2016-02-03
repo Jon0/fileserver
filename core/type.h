@@ -18,6 +18,7 @@ public:
     virtual int bits() const = 0;
     virtual const ptr_t lhs() const = 0;
     virtual const ptr_t rhs() const = 0;
+    virtual std::vector<state_space::ptr_t> subtypes() const = 0;
     virtual state_size state(const std::string &s) const = 0;
     virtual std::string symbol(state_size s) const = 0;
     static const ptr_t empty_set;
@@ -34,6 +35,7 @@ public:
     int bits() const override;
     const state_space::ptr_t lhs() const override;
     const state_space::ptr_t rhs() const override;
+    std::vector<state_space::ptr_t> subtypes() const override;
     state_size state(const std::string &s) const override;
     std::string symbol(state_size s) const override;
 
@@ -51,6 +53,7 @@ public:
     int bits() const override;
     const state_space::ptr_t lhs() const override;
     const state_space::ptr_t rhs() const override;
+    std::vector<state_space::ptr_t> subtypes() const override;
     state_size state(const std::string &s) const override;
     std::string symbol(state_size s) const override;
 
@@ -68,6 +71,7 @@ public:
     int bits() const override;
     const state_space::ptr_t lhs() const override;
     const state_space::ptr_t rhs() const override;
+    std::vector<state_space::ptr_t> subtypes() const override;
     state_size state(const std::string &s) const override;
     std::string symbol(state_size s) const override;
 
