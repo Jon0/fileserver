@@ -88,14 +88,10 @@ symbol::ptr_t read_value(state_space::ptr_t type, type_context &ct, tokens &sour
 
         // read function mappings
         while (!match(source, "}")) {
-            auto l_size = static_cast<long unsigned int>(type->lhs()->bytes());
             auto r_size = static_cast<long unsigned int>(type->rhs()->bytes());
             symbol::ptr_t lhs = read_value(type->lhs(), ct, source);
             if (match(source, "->")) {
-                state_size index;
-                int size = std::min(sizeof(index), l_size);
-                std::memcpy(&index, lhs->state(), size);
-                index %= type->lhs()->size();
+                state_size_t index = lhs->index();
                 symbol::ptr_t rhs = read_value(type->rhs(), ct, source);
                 std::memcpy(&b[index * r_size], rhs->state(), r_size);
             }
@@ -106,8 +102,8 @@ symbol::ptr_t read_value(state_space::ptr_t type, type_context &ct, tokens &sour
     }
     else if (match(source, "(")) {
         std::vector<state_space::ptr_t> types = type->subtypes();
-        state_size offset = 1;
-        state_size state = 0;
+        state_size_t offset = 1;
+        state_size_t state = 0;
 
         // read block states
         for (state_space::ptr_t &t : types) {
@@ -153,7 +149,7 @@ void read_func(program &p, type_context &ct, tokens &source) {
 program read_file(const std::string &fname) {
     tokens source = lex(fname);
     program p;
-    type_context ct;
+    type_context &ct = p;
 
     while (!source.empty()) {
         if (source.front() == "alias") {

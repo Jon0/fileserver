@@ -109,9 +109,18 @@ engine::~engine() {}
 
 void engine::start() {
     pr = read_file("test.m");
+    list_program();
     main_loop();
 }
 
+
+void engine::list_program() {
+    std::cout << "=== program types ===\n";
+    for (auto &t : pr.all_types()) {
+        std::cout << t.first << ", ";
+        std::cout << t.second->size() << "\n";
+    }
+}
 
 void engine::engine::main_loop() {
     symbol *main = pr.get_main();

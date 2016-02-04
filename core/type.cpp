@@ -26,7 +26,7 @@ state_enum::state_enum(std::vector<std::string> s)
     symbols(s) {}
 
 
-state_size state_enum::size() const {
+state_size_t state_enum::size() const {
     if (symbols.empty()) {
         return 1;
     }
@@ -57,8 +57,8 @@ std::vector<state_space::ptr_t> state_enum::subtypes() const {
 }
 
 
-state_size state_enum::state(const std::string &s) const {
-    for (state_size i = 0; i < symbols.size(); ++i) {
+state_size_t state_enum::state(const std::string &s) const {
+    for (state_size_t i = 0; i < symbols.size(); ++i) {
         if (symbols.at(i) == s) {
             return i;
         }
@@ -81,7 +81,7 @@ state_multiply::state_multiply(const std::vector<state_space::ptr_t> &sp)
 }
 
 
-state_size state_multiply::size() const {
+state_size_t state_multiply::size() const {
     int total = 1;
     for (const state_space::ptr_t &s : subspaces) {
         total *= s->size();
@@ -114,7 +114,7 @@ std::vector<state_space::ptr_t> state_multiply::subtypes() const {
 }
 
 
-state_size state_multiply::state(const std::string &s) const {
+state_size_t state_multiply::state(const std::string &s) const {
     return 0;
 }
 
@@ -130,8 +130,8 @@ state_function::state_function(state_space::ptr_t l, state_space::ptr_t r)
     rspace(r) {}
 
 
-state_size state_function::size() const {
-    return lspace->size() * rspace->size();
+state_size_t state_function::size() const {
+    return  std::pow(rspace->size(), lspace->size());
 }
 
 
@@ -156,7 +156,7 @@ std::vector<state_space::ptr_t> state_function::subtypes() const {
 }
 
 
-state_size state_function::state(const std::string &s) const {
+state_size_t state_function::state(const std::string &s) const {
     return 0;
 }
 
@@ -174,7 +174,7 @@ bool type_context::contains(const std::string &name) const {
 }
 
 
-std::unordered_map<std::string, state_space::ptr_t> type_context::all_types() const {
+alias_map_t type_context::all_types() const {
     return types;
 }
 

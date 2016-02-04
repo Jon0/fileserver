@@ -47,6 +47,7 @@ public:
      * might be useful to have a main loop class
      */
     void start();
+    void list_program();
     void main_loop();
 
     // return the set of nodes

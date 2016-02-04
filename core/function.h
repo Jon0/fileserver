@@ -64,7 +64,7 @@ private:
 };
 
 
-class program {
+class program : public type_context {
 public:
     program();
 
