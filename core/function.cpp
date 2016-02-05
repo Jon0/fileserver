@@ -82,11 +82,16 @@ program::program() {}
 
 
 symbol *program::get_main() {
-    if (symbols.count("main") == 0) {
+    return get_func("main");
+}
+
+
+symbol *program::get_func(const std::string &name) {
+    if (symbols.count(name) == 0) {
         return nullptr;
     }
     else {
-        return symbols.at("main").get();
+        return symbols.at(name).get();
     }
 }
 

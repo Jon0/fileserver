@@ -118,7 +118,8 @@ void engine::list_program() {
     std::cout << "=== program types ===\n";
     for (auto &t : pr.all_types()) {
         std::cout << t.first << ", ";
-        std::cout << t.second->size() << "\n";
+        std::cout << t.second->size() << " : ";
+        std::cout << t.second->bytes() << "\n";
     }
 }
 

@@ -70,6 +70,8 @@ public:
 
     symbol *get_main();
 
+    symbol *get_func(const std::string &name);
+
     void add_symbol(const std::string &name, symbol::ptr_t s);
 
 private:
