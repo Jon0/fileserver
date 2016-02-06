@@ -110,7 +110,7 @@ engine::~engine() {}
 void engine::start() {
     pr = read_file("test.m");
     list_program();
-    main_loop();
+    interpret_loop();
 }
 
 
@@ -123,7 +123,25 @@ void engine::list_program() {
     }
 }
 
-void engine::engine::main_loop() {
+
+void engine::interpret_loop() {
+    while(true) {
+        std::cout << "> ";
+        std::string input;
+        std::cin >> input;
+        symbol *s = pr.get_func(input);
+        if (s) {
+            std::cout << "function " << input << " : " << s->index() << "\n";
+
+        }
+        else {
+            std::cout << input << " undefined\n";
+        }
+    }
+}
+
+
+void engine::main_loop() {
     symbol *main = pr.get_main();
     if (main) {
         std::cout << "main found\n";

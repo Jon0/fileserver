@@ -48,6 +48,7 @@ public:
      */
     void start();
     void list_program();
+    void interpret_loop();
     void main_loop();
 
     // return the set of nodes
