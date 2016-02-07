@@ -141,7 +141,19 @@ void read_func(program &p, type_context &ct, tokens &source) {
             std::cout << "add symbol " << name << " : " << type->desc() << "\n";
             p.add_symbol(name, read_value(type, ct, source));
         }
+    }
+}
 
+
+void read_loop(program &p, type_context &ct, tokens &source) {
+    if (match(source, "loop")) {
+        std::string name = source.front();
+        source.pop();
+        state_space::ptr_t type = read_type(ct, source);
+        if (match(source, ":")) {
+            std::cout << "add loop " << name << " : " << type->desc() << "\n";
+            p.add_symbol(name, read_value(type, ct, source));
+        }
     }
 }
 
@@ -157,6 +169,9 @@ program read_file(const std::string &fname) {
         }
         else if (source.front() == "elem") {
             read_func(p, ct, source);
+        }
+        else if (source.front() == "loop") {
+            read_loop(p, ct, source);
         }
         else {
             std::cout << "cannot match " << source.front() << "\n";
