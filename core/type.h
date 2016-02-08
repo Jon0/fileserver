@@ -14,6 +14,7 @@ using state_size = state_size_t;
 class state_space {
 public:
     using ptr_t = std::shared_ptr<state_space>;
+    bool operator==(const state_space &other) const;
     int bytes() const;
     std::string desc() const;
     virtual state_size_t size() const = 0;

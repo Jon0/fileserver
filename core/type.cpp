@@ -8,6 +8,11 @@ namespace core {
 const state_space::ptr_t state_space::empty_set = std::make_shared<state_enum>(std::vector<std::string>());
 
 
+bool state_space::operator==(const state_space &other) const {
+    return size() == other.size();
+}
+
+
 int state_space::bytes() const {
     return std::ceil(bits() / 8.0);
 }
