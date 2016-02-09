@@ -6,9 +6,7 @@
 #include <vector>
 
 #include "channel.h"
-#include "function.h"
 #include "module.h"
-#include "queue.h"
 
 namespace core {
 
@@ -47,8 +45,6 @@ public:
      * might be useful to have a main loop class
      */
     void start();
-    void list_program();
-    void interpret_loop();
     void main_loop();
 
     // return the set of nodes
@@ -57,12 +53,6 @@ public:
 private:
     void init_modules();
     void open_module(const std::string &module_path);
-
-    // program
-    program pr;
-
-    // queue state
-    queue main_queue;
 
     // all registered nodes
     node_set nds;

@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "engine.h"
-#include "parser.h"
 
 namespace core {
 
@@ -108,51 +107,15 @@ engine::~engine() {}
 
 
 void engine::start() {
-    pr = read_file("test.m");
-    list_program();
+    init_modules();
     main_loop();
 }
 
 
-void engine::list_program() {
-    std::cout << "=== program types ===\n";
-    for (auto &t : pr.all_types()) {
-        std::cout << t.first << ", ";
-        std::cout << t.second->size() << " : ";
-        std::cout << t.second->bytes() << "\n";
-    }
-}
-
-
-void engine::interpret_loop() {
-    while(true) {
-        std::cout << "> ";
-        std::string input;
-        std::cin >> input;
-        symbol::ptr_t s = pr.get_func(input);
-        if (s) {
-            std::cout << "function " << input << " : " << s->index() << "\n";
-
-        }
-        else {
-            std::cout << input << " undefined\n";
-        }
-    }
-}
-
-
 void engine::main_loop() {
-    stream::ptr_t main = pr.get_main();
-    if (main) {
-        std::cout << "main found\n";
-        while (true) {
-            main->print_state();
-            main->test_input();
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        }
-    }
-    else {
-        std::cout << "no main function\n";
+    while (true) {
+        nds.update();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
