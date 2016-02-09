@@ -110,7 +110,7 @@ engine::~engine() {}
 void engine::start() {
     pr = read_file("test.m");
     list_program();
-    interpret_loop();
+    main_loop();
 }
 
 
@@ -129,7 +129,7 @@ void engine::interpret_loop() {
         std::cout << "> ";
         std::string input;
         std::cin >> input;
-        symbol *s = pr.get_func(input);
+        symbol::ptr_t s = pr.get_func(input);
         if (s) {
             std::cout << "function " << input << " : " << s->index() << "\n";
 
@@ -142,26 +142,13 @@ void engine::interpret_loop() {
 
 
 void engine::main_loop() {
-    symbol *main = pr.get_main();
+    stream::ptr_t main = pr.get_main();
     if (main) {
         std::cout << "main found\n";
-
-        state_space::ptr_t type = main->type();
-        std::cout << type->bytes() << "\n";
-        std::cout << type->size() << "\n";
-        std::unique_ptr<char[]> b = std::make_unique<char[]>(type->lhs()->bytes());
-        symbol::ptr_t current_state = std::make_shared<memory>(type->lhs(), b.get());
-
-
-        main_queue.insert();
-        while(!main_queue.empty()) {
-            queue_region *r = main_queue.front();
-            auto out = main->eval(current_state.get());
-            std::cout << out->type()->size() << "\n";
-            std::cout << static_cast<int>(*out->state()) << "\n";
-            current_state = out;
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        while (true) {
+            main->print_state();
+            main->test_input();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
     }
     else {

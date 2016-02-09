@@ -132,27 +132,39 @@ symbol::ptr_t read_value(state_space::ptr_t type, type_context &ct, tokens &sour
 }
 
 
+symbol::ptr_t read_type_value(type_context &ct, tokens &source) {
+    state_space::ptr_t type = read_type(ct, source);
+    if (!match(source, ":")) {
+        std::cout << "expected ':'\n";
+    }
+    return read_value(type, ct, source);
+}
+
+
 void read_func(program &p, type_context &ct, tokens &source) {
     if (match(source, "elem")) {
         std::string name = source.front();
         source.pop();
-        state_space::ptr_t type = read_type(ct, source);
-        if (match(source, ":")) {
-            std::cout << "add symbol " << name << " : " << type->desc() << "\n";
-            p.add_symbol(name, read_value(type, ct, source));
-        }
+        p.add_symbol(name, read_type_value(ct, source));
     }
 }
 
 
 void read_loop(program &p, type_context &ct, tokens &source) {
-    if (match(source, "loop")) {
+    if (match(source, "proc")) {
         std::string name = source.front();
         source.pop();
-        state_space::ptr_t type = read_type(ct, source);
-        if (match(source, ":")) {
-            std::cout << "add loop " << name << " : " << type->desc() << "\n";
-            p.add_symbol(name, read_value(type, ct, source));
+
+        // type and value
+        symbol::ptr_t init = read_type_value(ct, source);
+
+        // function
+        std::string func = source.front();
+        source.pop();
+
+        if (p.has_func(func)) {
+            auto s = std::make_shared<stream>(init, p.get_func(func));
+            p.add_stream(name, s);
         }
     }
 }
@@ -170,7 +182,7 @@ program read_file(const std::string &fname) {
         else if (source.front() == "elem") {
             read_func(p, ct, source);
         }
-        else if (source.front() == "loop") {
+        else if (source.front() == "proc") {
             read_loop(p, ct, source);
         }
         else {

@@ -1,4 +1,5 @@
 #include <cstring>
+#include <iostream>
 
 #include "function.h"
 
@@ -22,6 +23,18 @@ state_size symbol::index() const {
     std::memcpy(&i, state(), copy_size);
     i %= value_type->size();
     return i;
+}
+
+
+memory::memory(state_space::ptr_t value_type, state_size b)
+    :
+    symbol(value_type) {
+    auto t_size = static_cast<long unsigned int>(value_type->bytes());
+    int copy_size = std::min(sizeof(state_size), t_size);
+    int size = type()->bytes();
+    block = std::make_unique<char[]>(size);
+    b %= value_type->size();
+    std::memcpy(block.get(), &b, copy_size);
 }
 
 
@@ -78,26 +91,73 @@ const symbol::ptr_t submemory::eval(const symbol *in) const {
 }
 
 
-program::program() {}
+stream::stream(symbol::ptr_t initial_state, symbol::ptr_t transition)
+    :
+    state(initial_state),
+    function(transition) {}
 
 
-symbol *program::get_main() {
-    return get_func("main");
+void stream::print_state() const {
+    std::cout << "state: " << std::to_string(state->index()) << "\n";
 }
 
 
-symbol *program::get_func(const std::string &name) {
+void stream::process(symbol::ptr_t input) {
+    auto m = std::make_shared<memory>(state.get(), input.get());
+    auto r = function->eval(m.get());
+    if (state->type() == r->type()) {
+        state = r;
+    }
+}
+
+
+void stream::test_input() {
+    auto random = std::make_shared<memory>(state->type(), rand());
+    std::cout << "input: " << std::to_string(random->index()) << "\n";
+    process(random);
+}
+
+
+program::program() {}
+
+
+bool program::has_func(const std::string &name) const {
+    return symbols.count(name) > 0;
+}
+
+
+stream::ptr_t program::get_main() {
+    return get_stream("main");
+}
+
+
+symbol::ptr_t program::get_func(const std::string &name) {
     if (symbols.count(name) == 0) {
         return nullptr;
     }
     else {
-        return symbols.at(name).get();
+        return symbols.at(name);
+    }
+}
+
+
+stream::ptr_t program::get_stream(const std::string &name) {
+    if (streams.count(name) == 0) {
+        return nullptr;
+    }
+    else {
+        return streams.at(name);
     }
 }
 
 
 void program::add_symbol(const std::string &name, symbol::ptr_t s) {
     symbols.insert(std::make_pair(name, s));
+}
+
+
+void program::add_stream(const std::string &name, stream::ptr_t s) {
+    streams.insert(std::make_pair(name, s));
 }
 
 

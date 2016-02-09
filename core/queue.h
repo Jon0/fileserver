@@ -4,8 +4,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "function.h"
-
 namespace core {
 
 enum class queue_state {
@@ -40,22 +38,6 @@ private:
     region_map_t map;
     int front_id;
     int back_id;
-};
-
-
-class stream {
-public:
-    stream(symbol::ptr_t initial_state, symbol::ptr_t transition);
-
-    void process(symbol::ptr_t input);
-
-private:
-
-    queue in;
-    queue out;
-    symbol::ptr_t state;
-    symbol::ptr_t function;
-
 };
 
 
