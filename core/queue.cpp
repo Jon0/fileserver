@@ -35,8 +35,12 @@ stream::stream(symbol::ptr_t initial_state, symbol::ptr_t transition)
     function(transition) {}
 
 
-void stream::process(symbol::ptr_t function) {
-
+void stream::process(symbol::ptr_t input) {
+    auto m = std::make_shared<memory>(state.get(), input.get());
+    auto r = function->eval(m.get());
+    if (state->type() == r->type()) {
+        state = r;
+    }
 }
 
 

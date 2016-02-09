@@ -47,7 +47,7 @@ class stream {
 public:
     stream(symbol::ptr_t initial_state, symbol::ptr_t transition);
 
-    void process(symbol::ptr_t function);
+    void process(symbol::ptr_t input);
 
 private:
 
